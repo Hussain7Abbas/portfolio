@@ -1,0 +1,14 @@
+{
+  "name": "@devport/tailwind-config",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,27 @@
+# Example production stack — set env_file or environment for secrets.
+# Next.js apps typically use `output: "standalone"` in next.config for Docker images.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: devport
+      POSTGRES_PASSWORD: devport
+      POSTGRES_DB: devport
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    env_file:
+      - ../.env
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

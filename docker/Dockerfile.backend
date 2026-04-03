@@ -1,0 +1,27 @@
+# DevPort Elysia API — production-style image (adjust COPY paths for your CI context).
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+FROM base AS install
+COPY package.json bun.lock ./
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/db/package.json ./packages/db/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/tsconfig/package.json ./packages/tsconfig/
+RUN bun install --frozen-lockfile
+
+FROM base AS build
+COPY --from=install /app/node_modules ./node_modules
+COPY . .
+RUN cd packages/db && bunx prisma generate
+RUN cd apps/backend && bun run build
+
+FROM base AS production
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build /app/apps/backend/dist ./dist
+COPY --from=build /app/packages/db/generated ./packages/db/generated
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./
+EXPOSE 3001
+CMD ["bun", "dist/index.js"]

@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/page": "/",
+  "/(app)/events/page": "/events",
+  "/(app)/github/page": "/github",
+  "/(app)/messages/page": "/messages",
+  "/(app)/onboarding/page": "/onboarding",
+  "/(app)/profile/page": "/profile",
+  "/(app)/projects/page": "/projects",
+  "/(app)/seo/page": "/seo",
+  "/(app)/settings/page": "/settings",
+  "/(auth)/sign-in/page": "/sign-in",
+  "/(auth)/sign-up/page": "/sign-up",
+  "/(auth)/verify-email/page": "/verify-email",
+  "/(app)/certificates/page": "/certificates"
+}

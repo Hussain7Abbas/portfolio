@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          String     @default("user")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  profile      Profile?
+  projects     Project[]
+  certificates Certificate[]
+  events       Event[]
+  githubConfig GithubConfig?
+  messages     ContactMessage[]
+  seoMeta      SEOMeta?
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Profile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  username       String  @unique
+  displayName    String
+  title          String?
+  bio            String?
+  photoUrl       String?
+  resumeUrl      String?
+  githubUrl      String?
+  linkedinUrl    String?
+  twitterUrl     String?
+  websiteUrl     String?
+  emailPublic    String?
+  activeTemplate String  @default("vscode")
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([username])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  image       String?
+  description String?
+  tags        String[]
+  demoUrl     String?
+  sourceUrl   String?
+  order       Int      @default(0)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  image       String?
+  description String?
+  url         String?
+  order       Int      @default(0)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  image       String?
+  description String?
+  url         String?
+  order       Int      @default(0)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model GithubConfig {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  githubUsername String
+  selectedRepos  String[]
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model SEOMeta {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  title       String?
+  description String?
+  ogImage     String?
+  keywords    String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

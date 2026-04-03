@@ -1,50 +1,49 @@
-# vscode-portfolio
+# DevPort
 
-[![Open is Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/itsnitinr/vscode-portfolio)
+Open-source developer portfolio platform (Turborepo monorepo).
 
-A Visual Studio Code themed developer portfolio website built with Next.js and deployed on Vercel.
+## Apps
 
-![vscode-portfolio banner](https://imgur.com/JXJ9mpO.gif)
+| Package | Port (dev) | Description |
+|---------|------------|-------------|
+| `@devport/website` | 3004 | Marketing / landing |
+| `@devport/app` | 3000 | User portal |
+| `@devport/portfolio` | 3002 | Public portfolio renderer |
+| `@devport/dashboard` | 3003 | Admin dashboard |
+| `@devport/backend` | 3001 | Elysia API + Better Auth |
 
-## Features Roadmap
+## Packages
 
-- [ ] Themes and customizations
-  - [x] GitHub Dark (default)
-  - [ ] One Dark Pro
-  - [x] Dracula
-  - [x] Ayu
-  - [x] Nord
-- [ ] Interactive custom terminal
+- `@devport/db` — Prisma + PostgreSQL schema
+- `@devport/auth` — Better Auth server + React client helpers
+- `@devport/ui` — Shared UI utilities (`cn`, more to come)
+- `@devport/tsconfig` — Shared TypeScript configs
+- `@devport/tailwind-config` — Shared Tailwind preset
 
-For other features and themes suggestions, please open an issue.
+## Prerequisites
 
-## Environment Variables
+- [Bun](https://bun.sh)
+- Docker (for local PostgreSQL — optional until DB is wired)
 
-For fetching your certificates from dev.to, create an `.env.local` file inside the project directory. Check the `.env.local.example` file for more information.
-
-## Running Development Server
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
+cp .env.example .env
+# Set DATABASE_URL, BETTER_AUTH_SECRET (32+ chars), BETTER_AUTH_URL (browser origin, e.g. app on :3000)
+# Optional: NEXT_PUBLIC_GITHUB_REPO_URL for the marketing site GitHub links
+
+bun install
+docker compose -f docker/docker-compose.yml up -d
+bun run db:push
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Implementation steps are documented in [`plan/`](./plan/). See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local development and PR expectations.
 
-All VSCode related components can be found in the `components` folder. To change the content of the portfolio, check out the `pages` folder. To add or remove pages, modify `components/Sidebar.jsx` and `components/Tabsbar.jsx`.
+## Legacy
 
-## Next.js Resources
+The previous single-app portfolio lives under [`legacy/original-portfolio/`](./legacy/README.md).
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/)
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+See [LICENSE](./LICENSE).
