@@ -1,0 +1,14 @@
+# Static marketing site (next export → nginx). Build: docker build -f docker/Dockerfile.website -t devport-website ..
+FROM oven/bun:1 AS build
+WORKDIR /app
+COPY package.json bun.lock turbo.json ./
+COPY apps ./apps
+COPY packages ./packages
+RUN bun install --frozen-lockfile
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN cd apps/website && bun run build
+
+FROM nginx:alpine AS production
+COPY --from=build /app/apps/website/out /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

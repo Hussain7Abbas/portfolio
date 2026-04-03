@@ -3,11 +3,11 @@
   "/robots.txt/route": "/robots.txt",
   "/sitemap.xml/route": "/sitemap.xml",
   "/page": "/",
-  "/[username]/[templateSlug]/projects/page": "/[username]/[templateSlug]/projects",
-  "/[username]/[templateSlug]/certificates/page": "/[username]/[templateSlug]/certificates",
   "/[username]/[templateSlug]/about/page": "/[username]/[templateSlug]/about",
+  "/[username]/[templateSlug]/certificates/page": "/[username]/[templateSlug]/certificates",
   "/[username]/[templateSlug]/settings/page": "/[username]/[templateSlug]/settings",
   "/[username]/[templateSlug]/github/page": "/[username]/[templateSlug]/github",
-  "/[username]/[templateSlug]/page": "/[username]/[templateSlug]",
-  "/[username]/[templateSlug]/contact/page": "/[username]/[templateSlug]/contact"
+  "/[username]/[templateSlug]/contact/page": "/[username]/[templateSlug]/contact",
+  "/[username]/[templateSlug]/projects/page": "/[username]/[templateSlug]/projects",
+  "/[username]/[templateSlug]/page": "/[username]/[templateSlug]"
 }

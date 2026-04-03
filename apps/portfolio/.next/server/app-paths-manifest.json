@@ -3,11 +3,11 @@
   "/robots.txt/route": "app/robots.txt/route.js",
   "/sitemap.xml/route": "app/sitemap.xml/route.js",
   "/page": "app/page.js",
-  "/[username]/[templateSlug]/projects/page": "app/[username]/[templateSlug]/projects/page.js",
-  "/[username]/[templateSlug]/certificates/page": "app/[username]/[templateSlug]/certificates/page.js",
   "/[username]/[templateSlug]/about/page": "app/[username]/[templateSlug]/about/page.js",
+  "/[username]/[templateSlug]/certificates/page": "app/[username]/[templateSlug]/certificates/page.js",
   "/[username]/[templateSlug]/settings/page": "app/[username]/[templateSlug]/settings/page.js",
   "/[username]/[templateSlug]/github/page": "app/[username]/[templateSlug]/github/page.js",
-  "/[username]/[templateSlug]/page": "app/[username]/[templateSlug]/page.js",
-  "/[username]/[templateSlug]/contact/page": "app/[username]/[templateSlug]/contact/page.js"
+  "/[username]/[templateSlug]/contact/page": "app/[username]/[templateSlug]/contact/page.js",
+  "/[username]/[templateSlug]/projects/page": "app/[username]/[templateSlug]/projects/page.js",
+  "/[username]/[templateSlug]/page": "app/[username]/[templateSlug]/page.js"
 }

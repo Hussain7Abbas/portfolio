@@ -38,7 +38,7 @@ bun run db:push
 bun run dev
 ```
 
-Implementation steps are documented in [`plan/`](./plan/). See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local development and PR expectations.
+Implementation steps are documented in [`plan/`](./plan/). See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local development and PR expectations. Production Docker examples live under [`docker/`](./docker/README.md).
 
 ## Legacy
 

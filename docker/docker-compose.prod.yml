@@ -1,27 +1,104 @@
-# Example production stack — set env_file or environment for secrets.
-# Next.js apps typically use `output: "standalone"` in next.config for Docker images.
+# Production-oriented stack. Set POSTGRES_* and copy .env with secrets.
+# Build Next apps with correct BACKEND_URL for rewrites (default: http://backend:3001).
+# Usage: docker compose -f docker/docker-compose.prod.yml --env-file ../.env up --build
+
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: devport
-      POSTGRES_PASSWORD: devport
-      POSTGRES_DB: devport
+      POSTGRES_DB: ${POSTGRES_DB:-devport}
+      POSTGRES_USER: ${POSTGRES_USER:-devport}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devport}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devport}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
       context: ..
       dockerfile: docker/Dockerfile.backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     env_file:
       - ../.env
-    ports:
-      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-devport}:${POSTGRES_PASSWORD:-devport}@postgres:5432/${POSTGRES_DB:-devport}
+    expose:
+      - "3001"
+
+  website:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.website
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.next
+      args:
+        APP_NAME: app
+        BACKEND_URL: http://backend:3001
+    restart: unless-stopped
     depends_on:
-      - postgres
+      - backend
+    env_file:
+      - ../.env
+    expose:
+      - "3000"
+
+  portfolio:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.next
+      args:
+        APP_NAME: portfolio
+        BACKEND_URL: http://backend:3001
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ../.env
+    expose:
+      - "3000"
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.next
+      args:
+        APP_NAME: dashboard
+        BACKEND_URL: http://backend:3001
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ../.env
+    expose:
+      - "3000"
+
+  proxy:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - website
+      - app
+      - portfolio
+      - dashboard
 
 volumes:
-  postgres_data:
+  pgdata:

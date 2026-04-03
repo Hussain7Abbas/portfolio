@@ -1,17 +1,28 @@
-:root {
-  color-scheme: dark;
-  --bg: #07080c;
-  --bg-elevated: #0f1118;
-  --fg: #e8eaef;
-  --muted: #8b919d;
-  --accent: #3d9eff;
-  --accent-dim: #2563b8;
-  --border: #1e2230;
-  --card: #12141c;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-* {
-  box-sizing: border-box;
+@layer base {
+  :root {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 222 47% 8%;
+    --card-foreground: 213 31% 91%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 211 100% 62%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 211 100% 62%;
+    --radius: 0.5rem;
+  }
 }
 
 html {
@@ -19,8 +30,7 @@ html {
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
+  @apply bg-background text-foreground antialiased;
   font-family:
     ui-sans-serif,
     system-ui,
@@ -28,20 +38,4 @@ body {
     "Segoe UI",
     Roboto,
     sans-serif;
-  background: var(--bg);
-  color: var(--fg);
-  line-height: 1.6;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-code {
-  font-size: 0.9em;
 }

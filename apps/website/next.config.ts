@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: [],
+  output: "export",
+  transpilePackages: ["@devport/ui"],
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;

@@ -1,0 +1,32 @@
+# Next.js app (standalone). Example: docker build -f docker/Dockerfile.next --build-arg APP_NAME=app -t devport-app ..
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json bun.lock turbo.json ./
+COPY apps ./apps
+COPY packages ./packages
+RUN bun install --frozen-lockfile
+
+FROM base AS build
+ARG APP_NAME=app
+ARG BACKEND_URL=http://backend:3001
+ENV BACKEND_URL=${BACKEND_URL}
+COPY --from=deps /app /app
+WORKDIR /app
+RUN cd packages/db && bunx prisma generate
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN cd "apps/${APP_NAME}" && bun run build
+
+FROM base AS production
+ARG APP_NAME=app
+ENV APP_NAME=${APP_NAME}
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+WORKDIR /app
+COPY --from=build /app/apps/${APP_NAME}/.next/standalone ./
+COPY --from=build /app/apps/${APP_NAME}/.next/static "./apps/${APP_NAME}/.next/static"
+COPY --from=build /app/apps/${APP_NAME}/public "./apps/${APP_NAME}/public"
+EXPOSE 3000
+CMD ["sh", "-c", "node \"apps/${APP_NAME}/server.js\""]
