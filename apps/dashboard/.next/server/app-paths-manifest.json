@@ -1,7 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/forbidden/page": "app/forbidden/page.js",
-  "/page": "app/page.js",
-  "/users/page": "app/users/page.js",
-  "/(auth)/sign-in/page": "app/(auth)/sign-in/page.js"
-}

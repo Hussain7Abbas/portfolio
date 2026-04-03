@@ -7,18 +7,22 @@
   },
   "scripts": {
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev && prisma generate",
+    "db:push": "prisma db push && prisma generate",
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0"
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "dotenv": "^17.4.0",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@devport/tsconfig": "workspace:*",
     "@types/node": "^25.5.2",
-    "prisma": "^6.19.0",
+    "@types/pg": "^8.20.0",
+    "prisma": "^7.6.0",
     "typescript": "^5.9.0"
   }
 }

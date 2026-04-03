@@ -1,7 +1,0 @@
-{
-  "/_not-found/page": "/_not-found",
-  "/forbidden/page": "/forbidden",
-  "/page": "/",
-  "/users/page": "/users",
-  "/(auth)/sign-in/page": "/sign-in"
-}
