@@ -1,6 +1,15 @@
 import type { MetadataRoute } from "next";
+import { templateSupportsPage, type TemplateSubPage } from "@/templates/registry";
 
 const defaultApi = "http://127.0.0.1:3001";
+
+const SUB_PAGES: TemplateSubPage[] = [
+  "about",
+  "projects",
+  "certificates",
+  "github",
+  "contact",
+];
 
 type SitemapApiResponse = {
   profiles: Array<{
@@ -31,12 +40,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
 
   for (const p of profiles) {
+    const lastModified = new Date(p.updatedAt);
+    const base = `${baseUrl}/${p.username}/${p.activeTemplate}`;
     entries.push({
-      url: `${baseUrl}/${p.username}/${p.activeTemplate}`,
-      lastModified: new Date(p.updatedAt),
+      url: base,
+      lastModified,
       changeFrequency: "weekly",
       priority: 1,
     });
+    for (const page of SUB_PAGES) {
+      if (!templateSupportsPage(p.activeTemplate, page)) continue;
+      entries.push({
+        url: `${base}/${page}`,
+        lastModified,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
+    }
   }
 
   return entries;

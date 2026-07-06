@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Illustration from "@/templates/vscode/components/Illustration";
 import styles from "@vscode/styles/HomePage.module.css";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
+import { templateSupportsPage } from "@/templates/registry";
 
 interface PageProps {
   params: Promise<{ username: string; templateSlug: string }>;
@@ -20,7 +21,7 @@ export default async function PortfolioPage({ params }: PageProps) {
     notFound();
   }
 
-  if (templateSlug !== "vscode") {
+  if (!templateSupportsPage(templateSlug, "home")) {
     return (
       <main style={{ padding: "2rem", fontFamily: "system-ui, sans-serif", maxWidth: "40rem" }}>
         <h1 style={{ marginTop: 0 }}>{data.profile.displayName}</h1>

@@ -18,6 +18,8 @@ const github =
       }
     : undefined;
 
+const appOrigin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -25,6 +27,21 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60,
+    async sendVerificationEmail({ user, url }) {
+      // Make sure the link always points at the app origin (which proxies /api to the backend),
+      // regardless of how BETTER_AUTH_URL is configured, so the session cookie set on
+      // verification is scoped to the domain the app's own fetches use.
+      const [, query] = url.split("?");
+      const verifyUrl = query ? `${appOrigin}/api/auth/verify-email?${query}` : url;
+      // TODO(production): wire up a real transactional email provider (Resend, SES, Postmark...).
+      // For now this logs the link so it can be copied during local development / MVP testing.
+      console.log(`[devport] Verification email for ${user.email}: ${verifyUrl}`);
+    },
   },
   socialProviders: {
     ...(google ? { google } : {}),

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import EventCard from "@/templates/vscode/components/EventCard";
 import styles from "@vscode/styles/AboutPage.module.css";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
+import { templateSupportsPage } from "@/templates/registry";
 
 interface PageProps {
   params: Promise<{ username: string; templateSlug: string }>;
@@ -11,7 +12,7 @@ interface PageProps {
 export default async function AboutPage({ params }: PageProps) {
   const { username, templateSlug } = await params;
   const data = await getPortfolioByUsername(username);
-  if (!data || data.profile.activeTemplate !== templateSlug || templateSlug !== "vscode") {
+  if (!data || data.profile.activeTemplate !== templateSlug || !templateSupportsPage(templateSlug, "about")) {
     notFound();
   }
   const p = data.profile;

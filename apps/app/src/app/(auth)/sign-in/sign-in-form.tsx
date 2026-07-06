@@ -25,6 +25,10 @@ export function SignInForm() {
     });
     setLoading(false);
     if (res.error) {
+      if (res.error.code === "EMAIL_NOT_VERIFIED") {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
       setError(res.error.message ?? "Sign in failed");
       return;
     }

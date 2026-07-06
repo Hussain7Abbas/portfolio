@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, CSSProperties } from "react";
+import { Spinner } from "./spinner";
 
 const variants: Record<
   "primary" | "secondary" | "danger",
@@ -40,15 +41,32 @@ export function Button({
   variant = "primary",
   type = "button",
   style,
+  disabled,
+  loading,
+  children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: keyof typeof variants;
+  loading?: boolean;
 }) {
+  const isDisabled = Boolean(disabled || loading);
   return (
     <button
       type={type}
-      style={{ ...variants[variant], ...style }}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      style={{
+        ...variants[variant],
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.45rem",
+        ...(isDisabled ? { opacity: 0.65, cursor: "not-allowed" } : {}),
+        ...style,
+      }}
       {...props}
-    />
+    >
+      {loading ? <Spinner size={13} /> : null}
+      {children}
+    </button>
   );
 }

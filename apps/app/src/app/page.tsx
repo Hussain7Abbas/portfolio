@@ -6,6 +6,9 @@ export default async function HomePage() {
   if (!session?.user) {
     redirect("/sign-in");
   }
+  if (!session.user.emailVerified) {
+    redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`);
+  }
 
   const res = await fetchWithSession("/api/profile");
   if (!res.ok) {

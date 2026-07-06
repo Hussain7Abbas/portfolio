@@ -12,6 +12,7 @@
     "@aws-sdk/s3-request-presigner": "^3.758.0",
     "@devport/auth": "workspace:*",
     "@devport/db": "workspace:*",
+    "@devport/templates": "workspace:*",
     "@elysiajs/cors": "^1.4.0",
     "elysia": "^1.4.0"
   },

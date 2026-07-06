@@ -7,6 +7,20 @@ import {
   parseS3KeyFromPublicUrl,
 } from "../lib/s3";
 
+const ALLOWED_CONTENT_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  "application/pdf",
+]);
+
+const MAX_UPLOAD_BYTES: Record<string, number> = {
+  "application/pdf": 10 * 1024 * 1024,
+};
+const DEFAULT_MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
 export const uploadRoutes = new Elysia()
   .use(authMacro)
   .post(
@@ -15,6 +29,15 @@ export const uploadRoutes = new Elysia()
       if (!isS3Configured()) {
         set.status = 503;
         return { error: "File uploads are not configured" };
+      }
+      if (!ALLOWED_CONTENT_TYPES.has(body.contentType)) {
+        set.status = 400;
+        return { error: "Unsupported file type" };
+      }
+      const maxBytes = MAX_UPLOAD_BYTES[body.contentType] ?? DEFAULT_MAX_UPLOAD_BYTES;
+      if (body.contentLength !== undefined && body.contentLength > maxBytes) {
+        set.status = 400;
+        return { error: `File is too large (max ${Math.round(maxBytes / (1024 * 1024))} MB)` };
       }
       const u = user as SessionUser;
       const safeName = body.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -35,6 +58,7 @@ export const uploadRoutes = new Elysia()
       body: t.Object({
         filename: t.String({ minLength: 1 }),
         contentType: t.String({ minLength: 1 }),
+        contentLength: t.Optional(t.Number()),
       }),
     },
   )

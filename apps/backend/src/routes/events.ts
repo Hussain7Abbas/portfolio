@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@devport/db";
 import { authMacro, type SessionUser } from "../plugins/auth";
+import { findInvalidImageUrlField } from "../lib/url-validate";
 
 const eventBody = t.Object({
   name: t.String(),
@@ -36,6 +37,11 @@ export const eventRoutes = new Elysia()
     "/api/events",
     async ({ user, body, set }) => {
       const u = user as SessionUser;
+      const invalidField = findInvalidImageUrlField(body);
+      if (invalidField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidField}` };
+      }
       const maxOrder = await prisma.event.aggregate({
         where: { userId: u.id },
         _max: { order: true },
@@ -66,6 +72,11 @@ export const eventRoutes = new Elysia()
       if (!existing) {
         set.status = 404;
         return { error: "Not found" };
+      }
+      const invalidField = findInvalidImageUrlField(body);
+      if (invalidField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidField}` };
       }
       const event = await prisma.event.update({
         where: { id: params.id },

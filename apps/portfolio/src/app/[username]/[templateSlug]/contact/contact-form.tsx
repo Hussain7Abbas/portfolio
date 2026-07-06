@@ -5,11 +5,30 @@ import styles from "@vscode/styles/ContactPage.module.css";
 
 const apiBase = () => process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3001";
 
+const honeypotStyle: React.CSSProperties = {
+  position: "absolute",
+  left: "-9999px",
+  width: "1px",
+  height: "1px",
+  overflow: "hidden",
+};
+
+async function parseErrorMessage(res: Response): Promise<string> {
+  try {
+    const data = (await res.json()) as { error?: string };
+    if (data.error) return data.error;
+  } catch {
+    /* not JSON */
+  }
+  return "Failed to send message";
+}
+
 export function ContactForm({ username }: { username: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [company, setCompany] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
   const [err, setErr] = useState<string | null>(null);
 
@@ -28,12 +47,12 @@ export function ContactForm({ username }: { username: string }) {
             email: email.trim(),
             subject: subject.trim(),
             message: message.trim(),
+            company: company.trim(),
           }),
         },
       );
       if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "Request failed");
+        throw new Error(await parseErrorMessage(res));
       }
       setStatus("ok");
       setName("");
@@ -50,19 +69,40 @@ export function ContactForm({ username }: { username: string }) {
     <form className={styles.form} onSubmit={(e) => void submit(e)}>
       <label>
         Name
-        <input value={name} onChange={(e) => setName(e.target.value)} required />
+        <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} />
       </label>
       <label>
         Email
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          maxLength={254}
+        />
       </label>
       <label>
         Subject
-        <input value={subject} onChange={(e) => setSubject(e.target.value)} required />
+        <input value={subject} onChange={(e) => setSubject(e.target.value)} required maxLength={200} />
       </label>
       <label>
         Message
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={6} />
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          required
+          rows={6}
+          maxLength={5000}
+        />
+      </label>
+      <label style={honeypotStyle} aria-hidden="true">
+        Company
+        <input
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </label>
       <button type="submit" disabled={status === "loading"}>
         {status === "loading" ? "Sending…" : "Send"}

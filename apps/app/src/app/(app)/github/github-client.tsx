@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Label } from "@devport/ui";
-import { apiJson } from "@/lib/client-fetch";
+import { Button, EmptyState, Input, Label, Skeleton, useToast } from "@devport/ui";
+import { apiJson, ApiError } from "@/lib/client-fetch";
 
 type Repo = {
   id: number;
@@ -16,12 +16,15 @@ type Repo = {
 
 export function GithubClient() {
   const router = useRouter();
+  const toast = useToast();
   const [githubUsername, setGithubUsername] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [repos, setRepos] = useState<Repo[]>([]);
+  const [loadingConfig, setLoadingConfig] = useState(true);
   const [loadingRepos, setLoadingRepos] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [repoError, setRepoError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [reposLoaded, setReposLoaded] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -34,7 +37,9 @@ export function GithubClient() {
           setSelected(data.config.selectedRepos);
         }
       } catch {
-        /* ignore */
+        /* no config saved yet */
+      } finally {
+        setLoadingConfig(false);
       }
     })();
   }, []);
@@ -43,12 +48,13 @@ export function GithubClient() {
     const u = githubUsername.trim();
     if (!u) return;
     setLoadingRepos(true);
-    setError(null);
+    setRepoError(null);
     try {
       const data = await apiJson<{ repos: Repo[] }>(`/api/github/repos/${encodeURIComponent(u)}`);
       setRepos(data.repos);
+      setReposLoaded(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load repos");
+      setRepoError(e instanceof ApiError ? e.message : "Failed to load repositories");
       setRepos([]);
     } finally {
       setLoadingRepos(false);
@@ -62,8 +68,8 @@ export function GithubClient() {
   }
 
   async function save() {
-    setError(null);
-    setMsg(null);
+    if (saving) return;
+    setSaving(true);
     try {
       await apiJson("/api/github/config", {
         method: "PUT",
@@ -72,10 +78,12 @@ export function GithubClient() {
           selectedRepos: selected,
         }),
       });
-      setMsg("Saved.");
+      toast.success("GitHub configuration saved.");
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
+      toast.error(e instanceof ApiError ? e.message : "Failed to save configuration");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -85,61 +93,73 @@ export function GithubClient() {
       <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
         Set your GitHub username, load public repositories, and choose which appear on your portfolio.
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
-        <div>
-          <Label htmlFor="ghu">GitHub username</Label>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            <Input
-              id="ghu"
-              value={githubUsername}
-              onChange={(e) => setGithubUsername(e.target.value)}
-              placeholder="octocat"
-            />
-            <Button type="button" variant="secondary" onClick={() => void fetchRepos()} disabled={loadingRepos}>
-              {loadingRepos ? "Loading…" : "Load repos"}
-            </Button>
-          </div>
-        </div>
-        {error ? (
-          <p role="alert" style={{ color: "var(--error)" }}>
-            {error}
-          </p>
-        ) : null}
-        {repos.length > 0 ? (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, maxHeight: "22rem", overflow: "auto" }}>
-            {repos.map((r) => (
-              <li
-                key={r.id}
-                style={{
-                  padding: "0.5rem 0",
-                  borderBottom: "1px solid var(--border)",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "0.5rem",
-                }}
+      {loadingConfig ? (
+        <Skeleton height="2.25rem" width="20rem" style={{ marginTop: "1rem" }} />
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+          <div>
+            <Label htmlFor="ghu">GitHub username</Label>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              <Input
+                id="ghu"
+                value={githubUsername}
+                onChange={(e) => setGithubUsername(e.target.value)}
+                placeholder="octocat"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void fetchRepos()}
+                loading={loadingRepos}
+                disabled={!githubUsername.trim()}
               >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(r.name)}
-                  onChange={() => toggle(r.name)}
-                  id={`repo-${r.id}`}
-                />
-                <label htmlFor={`repo-${r.id}`} style={{ cursor: "pointer", flex: 1 }}>
-                  <strong>{r.name}</strong>{" "}
-                  <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>★ {r.stars}</span>
-                  {r.description ? (
-                    <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{r.description}</div>
-                  ) : null}
-                </label>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        <Button type="button" onClick={() => void save()}>
-          Save configuration
-        </Button>
-        {msg ? <p style={{ color: "var(--muted)" }}>{msg}</p> : null}
-      </div>
+                Load repos
+              </Button>
+            </div>
+          </div>
+          {repoError ? (
+            <p role="alert" style={{ color: "var(--error)" }}>
+              {repoError}
+            </p>
+          ) : null}
+          {reposLoaded && repos.length === 0 && !repoError ? (
+            <EmptyState title="No public repositories found" description="Check the username and try again." />
+          ) : null}
+          {repos.length > 0 ? (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, maxHeight: "22rem", overflow: "auto" }}>
+              {repos.map((r) => (
+                <li
+                  key={r.id}
+                  style={{
+                    padding: "0.5rem 0",
+                    borderBottom: "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(r.name)}
+                    onChange={() => toggle(r.name)}
+                    id={`repo-${r.id}`}
+                  />
+                  <label htmlFor={`repo-${r.id}`} style={{ cursor: "pointer", flex: 1 }}>
+                    <strong>{r.name}</strong>{" "}
+                    <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>★ {r.stars}</span>
+                    {r.description ? (
+                      <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{r.description}</div>
+                    ) : null}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <Button type="button" onClick={() => void save()} loading={saving}>
+            Save configuration
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

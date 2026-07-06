@@ -3,6 +3,7 @@ import ContactCode from "@/templates/vscode/components/ContactCode";
 import styles from "@vscode/styles/ContactPage.module.css";
 import { contactItemsFromProfile } from "@/lib/contact-items";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
+import { templateSupportsPage } from "@/templates/registry";
 import { ContactForm } from "./contact-form";
 
 interface PageProps {
@@ -12,7 +13,7 @@ interface PageProps {
 export default async function ContactPage({ params }: PageProps) {
   const { username, templateSlug } = await params;
   const data = await getPortfolioByUsername(username);
-  if (!data || data.profile.activeTemplate !== templateSlug || templateSlug !== "vscode") {
+  if (!data || data.profile.activeTemplate !== templateSlug || !templateSupportsPage(templateSlug, "contact")) {
     notFound();
   }
   const items = contactItemsFromProfile(data.profile);

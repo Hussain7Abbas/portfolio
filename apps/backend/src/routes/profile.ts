@@ -1,10 +1,35 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@devport/db";
+import { DEFAULT_TEMPLATE_SLUG, isValidTemplateSlug } from "@devport/templates";
 import { authMacro, type SessionUser } from "../plugins/auth";
 import {
   isReservedUsername,
   isValidUsernameFormat,
 } from "../lib/reserved-usernames";
+import { isValidEmail, isValidHttpUrl } from "../lib/url-validate";
+
+const URL_FIELD_NAMES = [
+  "photoUrl",
+  "resumeUrl",
+  "githubUrl",
+  "linkedinUrl",
+  "twitterUrl",
+  "websiteUrl",
+] as const;
+
+type UrlFieldName = (typeof URL_FIELD_NAMES)[number];
+
+function findInvalidUrlField(
+  data: Partial<Record<UrlFieldName, string | null>>,
+): UrlFieldName | null {
+  for (const name of URL_FIELD_NAMES) {
+    const value = data[name];
+    if (value && !isValidHttpUrl(value)) {
+      return name;
+    }
+  }
+  return null;
+}
 
 const profileBody = t.Object({
   username: t.Optional(t.String()),
@@ -19,6 +44,7 @@ const profileBody = t.Object({
   websiteUrl: t.Optional(t.Union([t.String(), t.Null()])),
   emailPublic: t.Optional(t.Union([t.String(), t.Null()])),
   activeTemplate: t.Optional(t.String()),
+  published: t.Optional(t.Boolean()),
 });
 
 export const profileRoutes = new Elysia()
@@ -62,6 +88,25 @@ export const profileRoutes = new Elysia()
         }
       }
 
+      if (
+        data.activeTemplate !== undefined &&
+        !isValidTemplateSlug(data.activeTemplate)
+      ) {
+        set.status = 400;
+        return { error: "Unknown template" };
+      }
+
+      const invalidUrlField = findInvalidUrlField(data);
+      if (invalidUrlField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidUrlField}` };
+      }
+
+      if (data.emailPublic && !isValidEmail(data.emailPublic)) {
+        set.status = 400;
+        return { error: "Invalid public email" };
+      }
+
       const existing = await prisma.profile.findUnique({
         where: { userId: u.id },
       });
@@ -86,7 +131,8 @@ export const profileRoutes = new Elysia()
             twitterUrl: data.twitterUrl ?? null,
             websiteUrl: data.websiteUrl ?? null,
             emailPublic: data.emailPublic ?? null,
-            activeTemplate: data.activeTemplate ?? "vscode",
+            activeTemplate: data.activeTemplate ?? DEFAULT_TEMPLATE_SLUG,
+            published: data.published ?? true,
           },
         });
         return { profile };
@@ -131,6 +177,7 @@ export const profileRoutes = new Elysia()
           ...(data.activeTemplate !== undefined
             ? { activeTemplate: data.activeTemplate }
             : {}),
+          ...(data.published !== undefined ? { published: data.published } : {}),
         },
       });
 

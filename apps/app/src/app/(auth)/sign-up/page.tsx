@@ -21,13 +21,14 @@ export default function SignUpPage() {
       name,
       email,
       password,
+      callbackURL: `${window.location.origin}/`,
     });
     setLoading(false);
     if (res.error) {
       setError(res.error.message ?? "Sign up failed");
       return;
     }
-    router.push("/verify-email");
+    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     router.refresh();
   }
 

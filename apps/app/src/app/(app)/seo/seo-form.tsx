@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Label, Textarea } from "@devport/ui";
-import { apiJson } from "@/lib/client-fetch";
+import { Button, Input, Label, Skeleton, Textarea, useToast } from "@devport/ui";
+import { apiJson, ApiError } from "@/lib/client-fetch";
 import { FileUploadField } from "@/components/file-upload";
 
 type Seo = {
@@ -15,6 +15,7 @@ type Seo = {
 
 export function SeoForm() {
   const router = useRouter();
+  const toast = useToast();
   const [seo, setSeo] = useState<Seo>({
     title: null,
     description: null,
@@ -22,8 +23,7 @@ export function SeoForm() {
     keywords: null,
   });
   const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -31,7 +31,7 @@ export function SeoForm() {
         const data = await apiJson<{ seoMeta: Seo | null }>("/api/seo");
         if (data.seoMeta) setSeo(data.seoMeta);
       } catch {
-        /* empty */
+        /* no overrides saved yet */
       } finally {
         setLoading(false);
       }
@@ -39,8 +39,8 @@ export function SeoForm() {
   }, []);
 
   async function save() {
-    setErr(null);
-    setMsg(null);
+    if (saving) return;
+    setSaving(true);
     try {
       await apiJson("/api/seo", {
         method: "PUT",
@@ -51,15 +51,26 @@ export function SeoForm() {
           keywords: seo.keywords,
         }),
       });
-      setMsg("Saved.");
+      toast.success("SEO settings saved.");
       router.refresh();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Failed");
+      toast.error(e instanceof ApiError ? e.message : "Failed to save SEO settings");
+    } finally {
+      setSaving(false);
     }
   }
 
   if (loading) {
-    return <p style={{ color: "var(--muted)" }}>Loading…</p>;
+    return (
+      <div style={{ maxWidth: "32rem" }}>
+        <h1 style={{ marginTop: 0 }}>SEO</h1>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+          <Skeleton height="2.25rem" />
+          <Skeleton height="5rem" />
+          <Skeleton height="2.25rem" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -85,20 +96,22 @@ export function SeoForm() {
           <Label htmlFor="k">Keywords (comma-separated)</Label>
           <Input id="k" value={seo.keywords ?? ""} onChange={(e) => setSeo({ ...seo, keywords: e.target.value || null })} />
         </div>
-        <FileUploadField label="Open Graph image" accept="image/*" onUploaded={(u) => setSeo({ ...seo, ogImage: u })} />
+        <FileUploadField
+          label="Open Graph image"
+          accept="image/*"
+          currentUrl={seo.ogImage}
+          onUploaded={(u) => setSeo({ ...seo, ogImage: u })}
+          onCleared={() => setSeo({ ...seo, ogImage: null })}
+        />
         <div>
-          <Label htmlFor="og">OG image URL</Label>
+          <Label htmlFor="og" style={{ fontSize: "0.78rem" }}>
+            Or paste an OG image URL
+          </Label>
           <Input id="og" value={seo.ogImage ?? ""} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value || null })} />
         </div>
-        <Button type="button" onClick={() => void save()}>
+        <Button type="button" onClick={() => void save()} loading={saving}>
           Save
         </Button>
-        {msg ? <p style={{ color: "var(--muted)" }}>{msg}</p> : null}
-        {err ? (
-          <p role="alert" style={{ color: "var(--error)" }}>
-            {err}
-          </p>
-        ) : null}
       </div>
     </div>
   );

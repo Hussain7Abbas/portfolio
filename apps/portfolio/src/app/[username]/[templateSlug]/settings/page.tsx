@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import ThemeInfo from "@/templates/vscode/components/ThemeInfo";
 import styles from "@vscode/styles/SettingsPage.module.css";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
+import { templateSupportsPage } from "@/templates/registry";
 
 interface PageProps {
   params: Promise<{ username: string; templateSlug: string }>;
@@ -19,7 +20,7 @@ const themes = [
 export default async function PortfolioSettingsPage({ params }: PageProps) {
   const { username, templateSlug } = await params;
   const data = await getPortfolioByUsername(username);
-  if (!data || data.profile.activeTemplate !== templateSlug || templateSlug !== "vscode") {
+  if (!data || data.profile.activeTemplate !== templateSlug || !templateSupportsPage(templateSlug, "settings")) {
     notFound();
   }
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import CertificateCard from "@/templates/vscode/components/CertificateCard";
 import styles from "@vscode/styles/CertificatesPage.module.css";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
+import { templateSupportsPage } from "@/templates/registry";
 
 interface PageProps {
   params: Promise<{ username: string; templateSlug: string }>;
@@ -10,7 +11,7 @@ interface PageProps {
 export default async function CertificatesPage({ params }: PageProps) {
   const { username, templateSlug } = await params;
   const data = await getPortfolioByUsername(username);
-  if (!data || data.profile.activeTemplate !== templateSlug || templateSlug !== "vscode") {
+  if (!data || data.profile.activeTemplate !== templateSlug || !templateSupportsPage(templateSlug, "certificates")) {
     notFound();
   }
   const certificates = data.certificates as Array<{

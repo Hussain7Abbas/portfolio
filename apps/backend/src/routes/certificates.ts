@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@devport/db";
 import { authMacro, type SessionUser } from "../plugins/auth";
+import { findInvalidImageUrlField } from "../lib/url-validate";
 
 const certificateBody = t.Object({
   name: t.String(),
@@ -36,6 +37,11 @@ export const certificateRoutes = new Elysia()
     "/api/certificates",
     async ({ user, body, set }) => {
       const u = user as SessionUser;
+      const invalidField = findInvalidImageUrlField(body);
+      if (invalidField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidField}` };
+      }
       const maxOrder = await prisma.certificate.aggregate({
         where: { userId: u.id },
         _max: { order: true },
@@ -66,6 +72,11 @@ export const certificateRoutes = new Elysia()
       if (!existing) {
         set.status = 404;
         return { error: "Not found" };
+      }
+      const invalidField = findInvalidImageUrlField(body);
+      if (invalidField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidField}` };
       }
       const certificate = await prisma.certificate.update({
         where: { id: params.id },

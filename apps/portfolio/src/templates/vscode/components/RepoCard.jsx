@@ -11,6 +11,9 @@ export default function RepoCard({ repo }) {
       </div>
       <div className={styles.stats}>
         <div>
+          {repo.language ? <span className={styles.language}>{repo.language}</span> : null}
+        </div>
+        <div>
           <div>
             <StarIcon className={styles.icon} /> {repo.stars ?? 0}
           </div>

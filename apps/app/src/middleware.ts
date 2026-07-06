@@ -23,16 +23,24 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  let hasUser = false;
+  let user: { id: string; email: string; emailVerified: boolean } | undefined;
   if (sessionRes.ok) {
-    const data = (await sessionRes.json()) as { user?: { id: string } };
-    hasUser = Boolean(data?.user);
+    const data = (await sessionRes.json()) as {
+      user?: { id: string; email: string; emailVerified: boolean };
+    };
+    user = data?.user;
   }
 
-  if (!hasUser) {
+  if (!user) {
     const signIn = new URL("/sign-in", request.url);
     signIn.searchParams.set("next", pathname);
     return NextResponse.redirect(signIn);
+  }
+
+  if (!user.emailVerified) {
+    const verify = new URL("/verify-email", request.url);
+    verify.searchParams.set("email", user.email);
+    return NextResponse.redirect(verify);
   }
 
   return NextResponse.next();

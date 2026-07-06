@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@devport/db";
 import { authMacro, type SessionUser } from "../plugins/auth";
+import { fetchPublicRepos, GithubApiError } from "../lib/github-api";
 
 const configBody = t.Object({
   githubUsername: t.String(),
@@ -44,44 +45,16 @@ export const githubRoutes = new Elysia()
   .get(
     "/api/github/repos/:username",
     async ({ params, set }) => {
-      const token = process.env.GITHUB_API_KEY;
-      const headers: Record<string, string> = {
-        Accept: "application/vnd.github+json",
-        "User-Agent": "DevPort",
-      };
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
+      try {
+        const repos = await fetchPublicRepos(params.username);
+        return { repos };
+      } catch (err) {
+        if (err instanceof GithubApiError) {
+          set.status = err.status === 404 ? 404 : 502;
+          return { error: "Failed to fetch repositories" };
+        }
+        throw err;
       }
-      const res = await fetch(
-        `https://api.github.com/users/${encodeURIComponent(params.username)}/repos?per_page=100&sort=updated`,
-        { headers },
-      );
-      if (!res.ok) {
-        set.status = res.status === 404 ? 404 : 502;
-        return { error: "Failed to fetch repositories" };
-      }
-      const repos = (await res.json()) as Array<{
-        id: number;
-        name: string;
-        description: string | null;
-        html_url: string;
-        stargazers_count: number;
-        language: string | null;
-        fork: boolean;
-        private: boolean;
-      }>;
-      const mapped = repos
-        .filter((r) => !r.fork && !r.private)
-        .map((r) => ({
-          id: r.id,
-          name: r.name,
-          description: r.description,
-          htmlUrl: r.html_url,
-          stars: r.stargazers_count,
-          language: r.language,
-        }))
-        .sort((a, b) => b.stars - a.stars);
-      return { repos: mapped };
     },
     { auth: true, params: t.Object({ username: t.String() }) },
   );

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import ProjectCard from "@/templates/vscode/components/ProjectCard";
 import styles from "@vscode/styles/ProjectsPage.module.css";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
+import { templateSupportsPage } from "@/templates/registry";
 
 interface PageProps {
   params: Promise<{ username: string; templateSlug: string }>;
@@ -10,7 +11,7 @@ interface PageProps {
 export default async function ProjectsPage({ params }: PageProps) {
   const { username, templateSlug } = await params;
   const data = await getPortfolioByUsername(username);
-  if (!data || data.profile.activeTemplate !== templateSlug || templateSlug !== "vscode") {
+  if (!data || data.profile.activeTemplate !== templateSlug || !templateSupportsPage(templateSlug, "projects")) {
     notFound();
   }
   const projects = data.projects as Array<{

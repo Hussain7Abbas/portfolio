@@ -23,7 +23,6 @@ export type SeoMetaPayload = {
 export type PortfolioPayload = {
   profile: {
     id: string;
-    userId: string;
     username: string;
     displayName: string;
     title: string | null;

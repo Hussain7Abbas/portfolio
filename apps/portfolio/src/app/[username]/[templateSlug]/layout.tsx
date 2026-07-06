@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getPortfolioByUsername } from "@/lib/get-portfolio";
-import { VscodeShell } from "@/templates/vscode/vscode-shell";
+import { getTemplateDefinition } from "@/templates/registry";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -73,13 +74,20 @@ export default async function PortfolioTemplateLayout({
 }: LayoutProps) {
   const { username, templateSlug } = await params;
   const data = await getPortfolioByUsername(username);
+  const def = getTemplateDefinition(templateSlug);
 
-  if (!data || data.profile.activeTemplate !== templateSlug) {
-    return children;
+  if (!data || data.profile.activeTemplate !== templateSlug || !def) {
+    notFound();
   }
 
   const base = portfolioBaseUrl();
   const path = `/${data.profile.username}/${templateSlug}`;
+  const sameAs = [
+    data.profile.githubUrl,
+    data.profile.linkedinUrl,
+    data.profile.twitterUrl,
+    data.profile.websiteUrl,
+  ].filter((url): url is string => Boolean(url));
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -87,19 +95,17 @@ export default async function PortfolioTemplateLayout({
     description: data.profile.bio ?? undefined,
     url: `${base}${path}`,
     image: data.profile.photoUrl ?? data.seoMeta?.ogImage ?? undefined,
+    sameAs: sameAs.length ? sameAs : undefined,
   };
 
-  const shell =
-    templateSlug === "vscode" ? (
-      <VscodeShell
-        base={path}
-        titlebarTitle={`${data.profile.displayName} - Visual Studio Code`}
-      >
-        {children}
-      </VscodeShell>
-    ) : (
-      children
-    );
+  const Shell = def.shell;
+  const shell = Shell ? (
+    <Shell base={path} titlebarTitle={`${data.profile.displayName} - Visual Studio Code`}>
+      {children}
+    </Shell>
+  ) : (
+    children
+  );
 
   return (
     <>

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@devport/auth": "workspace:*",
+    "@devport/templates": "workspace:*",
     "@devport/ui": "workspace:*",
     "next": "^15.2.0",
     "react": "^19.0.0",

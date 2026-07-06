@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { fetchWithSession, getServerSession } from "@/lib/session";
 import { AppHeader } from "./app-header";
 
 const nav = [
@@ -12,7 +14,22 @@ const nav = [
   { href: "/settings", label: "Settings" },
 ];
 
-export default function AppShellLayout({ children }: { children: React.ReactNode }) {
+export default async function AppShellLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession();
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
+  if (!session.user.emailVerified) {
+    redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`);
+  }
+  const profileRes = await fetchWithSession("/api/profile");
+  const profileData = profileRes.ok
+    ? ((await profileRes.json()) as { profile: unknown | null })
+    : { profile: null };
+  if (!profileData.profile) {
+    redirect("/onboarding");
+  }
+
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <aside

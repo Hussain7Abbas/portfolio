@@ -36,11 +36,16 @@
   margin-right: 0.75rem;
 }
 
-.stats > div:nth-child(2) {
+.stats > div:last-child {
   margin-right: 0;
 }
 
 .icon {
   color: var(--accent-color);
   margin-right: 0.3rem;
+}
+
+.language {
+  font-size: 0.85rem;
+  opacity: 0.8;
 }

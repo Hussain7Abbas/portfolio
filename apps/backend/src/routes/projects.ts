@@ -1,6 +1,18 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@devport/db";
 import { authMacro, type SessionUser } from "../plugins/auth";
+import { isValidHttpUrl } from "../lib/url-validate";
+
+function findInvalidUrl(fields: {
+  image?: string | null;
+  demoUrl?: string | null;
+  sourceUrl?: string | null;
+}): string | null {
+  if (fields.image && !isValidHttpUrl(fields.image)) return "image";
+  if (fields.demoUrl && !isValidHttpUrl(fields.demoUrl)) return "demoUrl";
+  if (fields.sourceUrl && !isValidHttpUrl(fields.sourceUrl)) return "sourceUrl";
+  return null;
+}
 
 const projectBody = t.Object({
   name: t.String(),
@@ -40,6 +52,11 @@ export const projectRoutes = new Elysia()
     "/api/projects",
     async ({ user, body, set }) => {
       const u = user as SessionUser;
+      const invalidField = findInvalidUrl(body);
+      if (invalidField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidField}` };
+      }
       const maxOrder = await prisma.project.aggregate({
         where: { userId: u.id },
         _max: { order: true },
@@ -72,6 +89,11 @@ export const projectRoutes = new Elysia()
       if (!existing) {
         set.status = 404;
         return { error: "Not found" };
+      }
+      const invalidField = findInvalidUrl(body);
+      if (invalidField) {
+        set.status = 400;
+        return { error: `Invalid URL for ${invalidField}` };
       }
       const project = await prisma.project.update({
         where: { id: params.id },

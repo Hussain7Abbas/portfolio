@@ -83,6 +83,9 @@ model Profile {
   websiteUrl     String?
   emailPublic    String?
   activeTemplate String  @default("vscode")
+  // Defaults to true so portfolios (including pre-existing ones backfilled by this
+  // column's rollout) stay publicly visible; users can unpublish from Settings.
+  published      Boolean @default(true)
   user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

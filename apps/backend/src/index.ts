@@ -28,6 +28,26 @@ const app = new Elysia()
       allowedHeaders: ["Content-Type", "Authorization"],
     }),
   )
+  .onError(({ code, error, set }) => {
+    if (code === "VALIDATION") {
+      set.status = 400;
+      const first = error.all[0];
+      const message =
+        (first?.summary ? String(first.summary) : undefined) ??
+        (typeof first?.message === "string" ? first.message : undefined) ??
+        "Invalid request";
+      return { error: message };
+    }
+    if (code === "NOT_FOUND") {
+      set.status = 404;
+      return { error: "Not found" };
+    }
+    console.error(error);
+    if (!set.status || set.status === 200) {
+      set.status = 500;
+    }
+    return { error: "Internal server error" };
+  })
   .mount(auth.handler)
   .use(portfolioPublicRoutes)
   .use(profileRoutes)

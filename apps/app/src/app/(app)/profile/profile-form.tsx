@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Input, Label, Textarea } from "@devport/ui";
-import { apiJson } from "@/lib/client-fetch";
+import { Button, Input, Label, Textarea, useToast } from "@devport/ui";
+import { apiJson, ApiError } from "@/lib/client-fetch";
 import { FileUploadField } from "@/components/file-upload";
 
 type Profile = {
@@ -23,15 +23,13 @@ type Profile = {
 
 export function ProfileForm({ initial }: { initial: Profile }) {
   const router = useRouter();
+  const toast = useToast();
   const [p, setP] = useState(initial);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   async function save() {
-    setLoading(true);
-    setErr(null);
-    setMsg(null);
+    if (saving) return;
+    setSaving(true);
     try {
       await apiJson("/api/profile", {
         method: "PUT",
@@ -48,12 +46,12 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           emailPublic: p.emailPublic,
         }),
       });
-      setMsg("Saved.");
+      toast.success("Profile saved.");
       router.refresh();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Save failed");
+      toast.error(e instanceof ApiError ? e.message : "Failed to save profile");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }
 
@@ -81,12 +79,16 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           <Textarea id="bio" value={p.bio ?? ""} onChange={(e) => setP({ ...p, bio: e.target.value || null })} />
         </div>
         <FileUploadField
-          label="Photo (requires S3 env)"
+          label="Photo"
           accept="image/*"
+          currentUrl={p.photoUrl}
           onUploaded={(url) => setP({ ...p, photoUrl: url })}
+          onCleared={() => setP({ ...p, photoUrl: null })}
         />
         <div>
-          <Label htmlFor="photoUrl">Photo URL</Label>
+          <Label htmlFor="photoUrl" style={{ fontSize: "0.78rem" }}>
+            Or paste a photo URL
+          </Label>
           <Input
             id="photoUrl"
             value={p.photoUrl ?? ""}
@@ -94,12 +96,16 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           />
         </div>
         <FileUploadField
-          label="Resume file (PDF)"
+          label="Resume (PDF)"
           accept="application/pdf"
+          currentUrl={p.resumeUrl}
           onUploaded={(url) => setP({ ...p, resumeUrl: url })}
+          onCleared={() => setP({ ...p, resumeUrl: null })}
         />
         <div>
-          <Label htmlFor="resumeUrl">Resume URL</Label>
+          <Label htmlFor="resumeUrl" style={{ fontSize: "0.78rem" }}>
+            Or paste a resume URL
+          </Label>
           <Input
             id="resumeUrl"
             value={p.resumeUrl ?? ""}
@@ -143,15 +149,9 @@ export function ProfileForm({ initial }: { initial: Profile }) {
             onChange={(e) => setP({ ...p, emailPublic: e.target.value || null })}
           />
         </div>
-        <Button onClick={() => void save()} disabled={loading}>
-          {loading ? "Saving…" : "Save profile"}
+        <Button onClick={() => void save()} loading={saving}>
+          Save profile
         </Button>
-        {msg ? <p style={{ color: "var(--muted)" }}>{msg}</p> : null}
-        {err ? (
-          <p role="alert" style={{ color: "var(--error)" }}>
-            {err}
-          </p>
-        ) : null}
       </div>
     </div>
   );
