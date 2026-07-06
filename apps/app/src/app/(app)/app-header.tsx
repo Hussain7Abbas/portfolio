@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export function AppHeader() {
@@ -13,27 +14,10 @@ export function AppHeader() {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        marginBottom: "1rem",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => void signOut()}
-        style={{
-          padding: "0.35rem 0.65rem",
-          fontSize: "0.85rem",
-          borderRadius: "6px",
-          border: "1px solid var(--border)",
-          background: "transparent",
-          color: "var(--muted)",
-        }}
-      >
+    <div className="mb-4 flex justify-end">
+      <Button type="button" variant="outline" size="sm" onClick={() => void signOut()}>
         Sign out
-      </button>
+      </Button>
     </div>
   );
 }

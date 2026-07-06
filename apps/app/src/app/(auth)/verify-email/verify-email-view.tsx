@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@devport/ui";
+import { LoadingButton } from "@/components/loading-button";
 import { authClient } from "@/lib/auth-client";
 
 const POLL_INTERVAL_MS = 3000;
@@ -88,8 +88,8 @@ export function VerifyEmailView() {
 
   return (
     <>
-      <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Check your email</h1>
-      <p style={{ color: "var(--muted)", fontSize: "0.95rem", lineHeight: 1.5 }}>
+      <h1 className="mb-2 text-2xl">Check your email</h1>
+      <p className="text-sm leading-relaxed text-muted-foreground">
         {verified ? (
           "Email verified! Redirecting…"
         ) : (
@@ -101,30 +101,28 @@ export function VerifyEmailView() {
       </p>
 
       {!verified ? (
-        <div style={{ marginTop: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <Button
+        <div className="mt-5 flex flex-col gap-2">
+          <LoadingButton
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={() => void resend()}
             disabled={!email}
             loading={resendState === "sending"}
           >
             {cooldown > 0 ? `Resend email (${cooldown}s)` : "Resend email"}
-          </Button>
+          </LoadingButton>
           {resendState === "sent" ? (
-            <p style={{ color: "var(--success)", fontSize: "0.85rem", margin: 0 }}>
-              Verification email sent.
-            </p>
+            <p className="m-0 text-sm text-green-600 dark:text-green-400">Verification email sent.</p>
           ) : null}
           {resendState === "error" && resendError ? (
-            <p role="alert" style={{ color: "var(--error)", fontSize: "0.85rem", margin: 0 }}>
+            <p role="alert" className="m-0 text-sm text-destructive">
               {resendError}
             </p>
           ) : null}
         </div>
       ) : null}
 
-      <p style={{ marginTop: "1.5rem", fontSize: "0.9rem", color: "var(--muted)" }}>
+      <p className="mt-6 text-sm text-muted-foreground">
         Wrong account? <Link href="/sign-in">Sign in</Link> with a different email.
       </p>
     </>

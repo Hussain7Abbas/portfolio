@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Label } from "@devport/ui";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { apiJson } from "@/lib/client-fetch";
 
 type UserRow = {
@@ -79,15 +88,17 @@ export function UsersTable() {
 
   return (
     <div>
-      <nav style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-        <Link href="/">Overview</Link>
-        <Link href="/users" style={{ fontWeight: 600 }}>
+      <nav className="mb-6 flex flex-wrap gap-4">
+        <Link href="/" className="text-primary hover:underline">
+          Overview
+        </Link>
+        <Link href="/users" className="font-semibold text-foreground">
           Users
         </Link>
       </nav>
-      <h1 style={{ marginTop: 0 }}>Users</h1>
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-        <div>
+      <h1 className="mt-0 text-2xl font-semibold">Users</h1>
+      <div className="mb-4 flex flex-wrap items-end gap-2">
+        <div className="space-y-2">
           <Label htmlFor="s">Search</Label>
           <Input
             id="s"
@@ -98,7 +109,6 @@ export function UsersTable() {
         </div>
         <Button
           type="button"
-          style={{ alignSelf: "flex-end" }}
           onClick={() => {
             setAppliedSearch(searchInput.trim());
             setPage(1);
@@ -107,46 +117,46 @@ export function UsersTable() {
           Search
         </Button>
       </div>
-      {loading ? <p style={{ color: "var(--muted)" }}>Loading…</p> : null}
+      {loading ? <p className="text-muted-foreground">Loading…</p> : null}
       {error ? (
-        <p role="alert" style={{ color: "var(--error)" }}>
+        <p role="alert" className="text-destructive">
           {error}
         </p>
       ) : null}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+      <table className="w-full border-collapse text-sm">
         <thead>
-          <tr style={{ borderBottom: "1px solid var(--border)", textAlign: "left" }}>
-            <th style={{ padding: "0.5rem" }}>Email</th>
-            <th style={{ padding: "0.5rem" }}>Name</th>
-            <th style={{ padding: "0.5rem" }}>Username</th>
-            <th style={{ padding: "0.5rem" }}>Role</th>
-            <th style={{ padding: "0.5rem" }} />
+          <tr className="border-b border-border text-left">
+            <th className="p-2">Email</th>
+            <th className="p-2">Name</th>
+            <th className="p-2">Username</th>
+            <th className="p-2">Role</th>
+            <th className="p-2" />
           </tr>
         </thead>
         <tbody>
           {users.map((u) => (
-            <tr key={u.id} style={{ borderBottom: "1px solid var(--border)" }}>
-              <td style={{ padding: "0.5rem" }}>{u.email}</td>
-              <td style={{ padding: "0.5rem" }}>{u.name}</td>
-              <td style={{ padding: "0.5rem" }}>{u.profile?.username ?? "—"}</td>
-              <td style={{ padding: "0.5rem" }}>
-                <select
+            <tr key={u.id} className="border-b border-border">
+              <td className="p-2">{u.email}</td>
+              <td className="p-2">{u.name}</td>
+              <td className="p-2">{u.profile?.username ?? "—"}</td>
+              <td className="p-2">
+                <Select
                   value={u.role}
-                  onChange={(e) => void setRole(u.id, e.target.value)}
-                  style={{
-                    background: "var(--input-bg)",
-                    color: "var(--fg)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "4px",
-                    padding: "0.25rem",
+                  onValueChange={(value) => {
+                    if (value) void setRole(u.id, value);
                   }}
                 >
-                  <option value="user">user</option>
-                  <option value="admin">admin</option>
-                </select>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">user</SelectItem>
+                    <SelectItem value="admin">admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </td>
-              <td style={{ padding: "0.5rem" }}>
-                <Button variant="danger" type="button" onClick={() => void removeUser(u.id)}>
+              <td className="p-2">
+                <Button variant="destructive" type="button" onClick={() => void removeUser(u.id)}>
                   Delete
                 </Button>
               </td>
@@ -155,16 +165,16 @@ export function UsersTable() {
         </tbody>
       </table>
       {pages > 1 ? (
-        <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <Button type="button" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+        <div className="mt-4 flex items-center gap-2">
+          <Button type="button" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             Prev
           </Button>
-          <span>
+          <span className="text-sm">
             Page {page} / {pages}
           </span>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             disabled={page >= pages}
             onClick={() => setPage((p) => p + 1)}
           >

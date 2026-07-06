@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, EmptyState, Skeleton, useConfirm, useToast } from "@devport/ui";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingButton } from "@/components/loading-button";
+import { EmptyState } from "@/components/empty-state";
+import { useConfirm } from "@/components/use-confirm";
 import { apiFetch, apiJson, ApiError } from "@/lib/client-fetch";
 
 type Message = {
@@ -17,7 +23,6 @@ type Message = {
 
 export function MessagesClient() {
   const router = useRouter();
-  const toast = useToast();
   const { confirm, dialog } = useConfirm();
 
   const [items, setItems] = useState<Message[]>([]);
@@ -89,18 +94,18 @@ export function MessagesClient() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Messages</h1>
+      <h1 className="mt-0">Messages</h1>
       {!loading && !loadError ? (
-        <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>Total: {total}</p>
+        <p className="text-sm text-muted-foreground">Total: {total}</p>
       ) : null}
 
       {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <Skeleton height="6rem" />
-          <Skeleton height="6rem" />
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
         </div>
       ) : loadError ? (
-        <p role="alert" style={{ color: "var(--error)" }}>
+        <p role="alert" className="text-destructive">
           {loadError}
         </p>
       ) : items.length === 0 ? (
@@ -109,58 +114,60 @@ export function MessagesClient() {
           description="Messages sent through your portfolio's contact form will show up here."
         />
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {items.map((m) => (
             <li key={m.id}>
-              <Card style={{ opacity: m.read ? 0.85 : 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", flexWrap: "wrap" }}>
-                  <strong>{m.subject}</strong>
-                  <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                    {new Date(m.createdAt).toLocaleString()}
-                  </span>
-                </div>
-                <p style={{ margin: "0.35rem 0", fontSize: "0.9rem" }}>
-                  From {m.name} &lt;{m.email}&gt;
-                </p>
-                <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{m.message}</p>
-                <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.35rem" }}>
-                  {!m.read ? (
-                    <Button
+              <Card className={m.read ? "opacity-85" : undefined}>
+                <CardContent className="pt-4">
+                  <div className="flex flex-wrap justify-between gap-2">
+                    <strong>{m.subject}</strong>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(m.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="my-1.5 text-sm">
+                    From {m.name} &lt;{m.email}&gt;
+                  </p>
+                  <p className="m-0 whitespace-pre-wrap">{m.message}</p>
+                  <div className="mt-2 flex gap-1.5">
+                    {!m.read ? (
+                      <LoadingButton
+                        type="button"
+                        variant="outline"
+                        onClick={() => void markRead(m.id)}
+                        loading={pendingId === m.id}
+                        disabled={pendingId !== null && pendingId !== m.id}
+                      >
+                        Mark read
+                      </LoadingButton>
+                    ) : null}
+                    <LoadingButton
+                      variant="destructive"
                       type="button"
-                      variant="secondary"
-                      onClick={() => void markRead(m.id)}
+                      onClick={() => void remove(m)}
                       loading={pendingId === m.id}
                       disabled={pendingId !== null && pendingId !== m.id}
                     >
-                      Mark read
-                    </Button>
-                  ) : null}
-                  <Button
-                    variant="danger"
-                    type="button"
-                    onClick={() => void remove(m)}
-                    loading={pendingId === m.id}
-                    disabled={pendingId !== null && pendingId !== m.id}
-                  >
-                    Delete
-                  </Button>
-                </div>
+                      Delete
+                    </LoadingButton>
+                  </div>
+                </CardContent>
               </Card>
             </li>
           ))}
         </ul>
       )}
       {!loading && !loadError && pages > 1 ? (
-        <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <Button type="button" variant="secondary" disabled={page <= 1} onClick={() => void load(page - 1)}>
+        <div className="mt-4 flex items-center gap-2">
+          <Button type="button" variant="outline" disabled={page <= 1} onClick={() => void load(page - 1)}>
             Prev
           </Button>
-          <span style={{ fontSize: "0.9rem" }}>
+          <span className="text-sm">
             Page {page} / {pages}
           </span>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             disabled={page >= pages}
             onClick={() => void load(page + 1)}
           >

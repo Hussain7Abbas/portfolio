@@ -3,7 +3,7 @@ import { VerifyEmailView } from "./verify-email-view";
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<p style={{ color: "var(--muted)" }}>Loading…</p>}>
+    <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
       <VerifyEmailView />
     </Suspense>
   );

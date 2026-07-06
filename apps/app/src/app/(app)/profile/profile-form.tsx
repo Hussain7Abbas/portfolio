@@ -2,7 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Input, Label, Textarea, useToast } from "@devport/ui";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { LoadingButton } from "@/components/loading-button";
 import { apiJson, ApiError } from "@/lib/client-fetch";
 import { FileUploadField } from "@/components/file-upload";
 
@@ -23,7 +27,6 @@ type Profile = {
 
 export function ProfileForm({ initial }: { initial: Profile }) {
   const router = useRouter();
-  const toast = useToast();
   const [p, setP] = useState(initial);
   const [saving, setSaving] = useState(false);
 
@@ -56,27 +59,45 @@ export function ProfileForm({ initial }: { initial: Profile }) {
   }
 
   return (
-    <div style={{ maxWidth: "32rem" }}>
-      <h1 style={{ marginTop: 0 }}>Profile</h1>
-      <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+    <div className="max-w-lg">
+      <h1 className="mt-0">Profile</h1>
+      <p className="text-sm text-muted-foreground">
         Username is set at onboarding; contact support to change it.
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+      <div className="mt-4 flex flex-col gap-3">
         <div>
           <Label>Username</Label>
-          <Input value={p.username} readOnly style={{ opacity: 0.75 }} />
+          <Input value={p.username} readOnly className="opacity-75" />
         </div>
         <div>
           <Label htmlFor="dn">Display name</Label>
-          <Input id="dn" value={p.displayName} onChange={(e) => setP({ ...p, displayName: e.target.value })} />
+          <Input
+            id="dn"
+            value={p.displayName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, displayName: e.target.value })
+            }
+          />
         </div>
         <div>
           <Label htmlFor="ti">Title</Label>
-          <Input id="ti" value={p.title ?? ""} onChange={(e) => setP({ ...p, title: e.target.value || null })} />
+          <Input
+            id="ti"
+            value={p.title ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, title: e.target.value || null })
+            }
+          />
         </div>
         <div>
           <Label htmlFor="bio">Bio</Label>
-          <Textarea id="bio" value={p.bio ?? ""} onChange={(e) => setP({ ...p, bio: e.target.value || null })} />
+          <Textarea
+            id="bio"
+            value={p.bio ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setP({ ...p, bio: e.target.value || null })
+            }
+          />
         </div>
         <FileUploadField
           label="Photo"
@@ -86,13 +107,15 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           onCleared={() => setP({ ...p, photoUrl: null })}
         />
         <div>
-          <Label htmlFor="photoUrl" style={{ fontSize: "0.78rem" }}>
+          <Label htmlFor="photoUrl" className="text-xs">
             Or paste a photo URL
           </Label>
           <Input
             id="photoUrl"
             value={p.photoUrl ?? ""}
-            onChange={(e) => setP({ ...p, photoUrl: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, photoUrl: e.target.value || null })
+            }
           />
         </div>
         <FileUploadField
@@ -103,25 +126,35 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           onCleared={() => setP({ ...p, resumeUrl: null })}
         />
         <div>
-          <Label htmlFor="resumeUrl" style={{ fontSize: "0.78rem" }}>
+          <Label htmlFor="resumeUrl" className="text-xs">
             Or paste a resume URL
           </Label>
           <Input
             id="resumeUrl"
             value={p.resumeUrl ?? ""}
-            onChange={(e) => setP({ ...p, resumeUrl: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, resumeUrl: e.target.value || null })
+            }
           />
         </div>
         <div>
           <Label htmlFor="gh">GitHub URL</Label>
-          <Input id="gh" value={p.githubUrl ?? ""} onChange={(e) => setP({ ...p, githubUrl: e.target.value || null })} />
+          <Input
+            id="gh"
+            value={p.githubUrl ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, githubUrl: e.target.value || null })
+            }
+          />
         </div>
         <div>
           <Label htmlFor="li">LinkedIn URL</Label>
           <Input
             id="li"
             value={p.linkedinUrl ?? ""}
-            onChange={(e) => setP({ ...p, linkedinUrl: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, linkedinUrl: e.target.value || null })
+            }
           />
         </div>
         <div>
@@ -129,7 +162,9 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           <Input
             id="tw"
             value={p.twitterUrl ?? ""}
-            onChange={(e) => setP({ ...p, twitterUrl: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, twitterUrl: e.target.value || null })
+            }
           />
         </div>
         <div>
@@ -137,7 +172,9 @@ export function ProfileForm({ initial }: { initial: Profile }) {
           <Input
             id="web"
             value={p.websiteUrl ?? ""}
-            onChange={(e) => setP({ ...p, websiteUrl: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, websiteUrl: e.target.value || null })
+            }
           />
         </div>
         <div>
@@ -146,12 +183,14 @@ export function ProfileForm({ initial }: { initial: Profile }) {
             id="em"
             type="email"
             value={p.emailPublic ?? ""}
-            onChange={(e) => setP({ ...p, emailPublic: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setP({ ...p, emailPublic: e.target.value || null })
+            }
           />
         </div>
-        <Button onClick={() => void save()} loading={saving}>
+        <LoadingButton onClick={() => void save()} loading={saving}>
           Save profile
-        </Button>
+        </LoadingButton>
       </div>
     </div>
   );

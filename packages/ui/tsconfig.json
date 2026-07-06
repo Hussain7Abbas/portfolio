@@ -6,7 +6,11 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@/lib/utils": ["./src/lib/utils.ts"],
+      "@/components/ui/*": ["./src/components/ui/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button, ErrorState } from "@devport/ui";
+import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/error-state";
 
 export default function AppError({
   error,

@@ -6,7 +6,7 @@ const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:3001";
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(process.cwd(), "../.."),
-  transpilePackages: ["@devport/auth", "@devport/ui"],
+  transpilePackages: ["@devport/auth"],
   async rewrites() {
     return [
       {

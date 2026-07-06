@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Button,
-  Card,
-  EmptyState,
-  Input,
-  Label,
-  Skeleton,
-  Textarea,
-  useConfirm,
-  useToast,
-} from "@devport/ui";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { LoadingButton } from "@/components/loading-button";
+import { EmptyState } from "@/components/empty-state";
+import { useConfirm } from "@/components/use-confirm";
 import { apiFetch, apiJson, ApiError } from "@/lib/client-fetch";
 import { FileUploadField } from "@/components/file-upload";
 
@@ -67,7 +66,9 @@ function EventFields({
         <Input
           id={`${idPrefix}-name`}
           value={form.name}
-          onChange={(e) => onChange({ ...form, name: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, name: e.target.value })
+          }
           required
         />
       </div>
@@ -76,7 +77,9 @@ function EventFields({
         <Textarea
           id={`${idPrefix}-desc`}
           value={form.description}
-          onChange={(e) => onChange({ ...form, description: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            onChange({ ...form, description: e.target.value })
+          }
         />
       </div>
       <FileUploadField
@@ -87,13 +90,15 @@ function EventFields({
         onCleared={() => onChange({ ...form, imageUrl: null })}
       />
       <div>
-        <Label htmlFor={`${idPrefix}-img`} style={{ fontSize: "0.78rem" }}>
+        <Label htmlFor={`${idPrefix}-img`} className="text-xs">
           Or paste an image URL
         </Label>
         <Input
           id={`${idPrefix}-img`}
           value={form.imageUrl ?? ""}
-          onChange={(e) => onChange({ ...form, imageUrl: e.target.value || null })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, imageUrl: e.target.value || null })
+          }
         />
       </div>
       <div>
@@ -101,7 +106,9 @@ function EventFields({
         <Input
           id={`${idPrefix}-url`}
           value={form.url}
-          onChange={(e) => onChange({ ...form, url: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, url: e.target.value })
+          }
         />
       </div>
     </>
@@ -110,7 +117,6 @@ function EventFields({
 
 export function EventsClient() {
   const router = useRouter();
-  const toast = useToast();
   const { confirm, dialog } = useConfirm();
 
   const [items, setItems] = useState<Row[]>([]);
@@ -218,72 +224,81 @@ export function EventsClient() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Events</h1>
+      <h1 className="mt-0">Events</h1>
       <form
         onSubmit={(e) => void add(e)}
-        style={{ marginBottom: "2rem", display: "flex", flexDirection: "column", gap: "0.65rem", maxWidth: "28rem" }}
+        className="mb-8 flex max-w-md flex-col gap-2.5"
       >
-        <h2 style={{ fontSize: "1.1rem" }}>Add event</h2>
+        <h2 className="text-lg">Add event</h2>
         <EventFields form={addForm} onChange={setAddForm} idPrefix="add" />
-        <Button type="submit" loading={adding}>
+        <LoadingButton type="submit" loading={adding}>
           Add
-        </Button>
+        </LoadingButton>
       </form>
 
       {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", maxWidth: "28rem" }}>
-          <Skeleton height="4.5rem" />
-          <Skeleton height="4.5rem" />
+        <div className="flex max-w-md flex-col gap-3">
+          <Skeleton className="h-[4.5rem]" />
+          <Skeleton className="h-[4.5rem]" />
         </div>
       ) : loadError ? (
-        <p role="alert" style={{ color: "var(--error)" }}>
+        <p role="alert" className="text-destructive">
           {loadError}
         </p>
       ) : items.length === 0 ? (
         <EmptyState title="No events yet" description="Add an event above to display it here." />
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {items.map((c) =>
             editingId === c.id ? (
               <li key={c.id}>
                 <Card>
-                  <form
-                    onSubmit={(e) => void saveEdit(e)}
-                    style={{ display: "flex", flexDirection: "column", gap: "0.65rem", maxWidth: "26rem" }}
-                  >
-                    <EventFields form={editForm} onChange={setEditForm} idPrefix={`edit-${c.id}`} />
-                    <div style={{ display: "flex", gap: "0.35rem" }}>
-                      <Button type="submit" loading={savingEdit}>
-                        Save
-                      </Button>
-                      <Button type="button" variant="secondary" onClick={cancelEdit} disabled={savingEdit}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
+                  <CardContent className="pt-4">
+                    <form
+                      onSubmit={(e) => void saveEdit(e)}
+                      className="flex max-w-md flex-col gap-2.5"
+                    >
+                      <EventFields form={editForm} onChange={setEditForm} idPrefix={`edit-${c.id}`} />
+                      <div className="flex gap-1.5">
+                        <LoadingButton type="submit" loading={savingEdit}>
+                          Save
+                        </LoadingButton>
+                        <Button type="button" variant="outline" onClick={cancelEdit} disabled={savingEdit}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
                 </Card>
               </li>
             ) : (
               <li key={c.id}>
                 <Card>
-                  <strong>{c.name}</strong>
-                  {c.description ? (
-                    <p style={{ color: "var(--muted)", fontSize: "0.9rem", margin: "0.35rem 0" }}>{c.description}</p>
-                  ) : null}
-                  <div style={{ display: "flex", gap: "0.35rem", marginTop: "0.5rem" }}>
-                    <Button variant="secondary" type="button" onClick={() => startEdit(c)} disabled={pendingId !== null}>
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      type="button"
-                      onClick={() => void remove(c)}
-                      loading={pendingId === c.id}
-                      disabled={pendingId !== null && pendingId !== c.id}
-                    >
-                      Delete
-                    </Button>
-                  </div>
+                  <CardContent className="pt-4">
+                    <strong>{c.name}</strong>
+                    {c.description ? (
+                      <p className="my-1.5 text-sm text-muted-foreground">{c.description}</p>
+                    ) : null}
+                    <div className="mt-2 flex gap-1.5">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => startEdit(c)}
+                        disabled={pendingId !== null}
+                      >
+                        Edit
+                      </Button>
+                      <LoadingButton
+                        variant="destructive"
+                        type="button"
+                        onClick={() => void remove(c)}
+                        loading={pendingId === c.id}
+                        disabled={pendingId !== null && pendingId !== c.id}
+                      >
+                        Delete
+                      </LoadingButton>
+                    </div>
+                  </CardContent>
                 </Card>
               </li>
             ),

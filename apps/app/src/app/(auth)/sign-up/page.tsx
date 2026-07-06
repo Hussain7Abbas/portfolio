@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LoadingButton } from "@/components/loading-button";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignUpPage() {
@@ -34,89 +37,57 @@ export default function SignUpPage() {
 
   return (
     <>
-      <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Create account</h1>
-      <p style={{ color: "var(--muted)", marginBottom: "1.25rem", fontSize: "0.9rem" }}>
-        Start building your DevPort profile
-      </p>
-      <form
-        onSubmit={onSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-      >
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-          <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Name</span>
-          <input
+      <h1 className="mb-2 text-2xl">Create account</h1>
+      <p className="mb-5 text-sm text-muted-foreground">Start building your DevPort profile</p>
+      <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
             autoComplete="name"
-            style={{
-              padding: "0.5rem 0.65rem",
-              borderRadius: "6px",
-              border: "1px solid var(--border)",
-              background: "var(--input-bg)",
-              color: "var(--fg)",
-            }}
           />
-        </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-          <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Email</span>
-          <input
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            style={{
-              padding: "0.5rem 0.65rem",
-              borderRadius: "6px",
-              border: "1px solid var(--border)",
-              background: "var(--input-bg)",
-              color: "var(--fg)",
-            }}
           />
-        </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-          <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Password</span>
-          <input
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
             autoComplete="new-password"
-            style={{
-              padding: "0.5rem 0.65rem",
-              borderRadius: "6px",
-              border: "1px solid var(--border)",
-              background: "var(--input-bg)",
-              color: "var(--fg)",
-            }}
           />
-        </label>
+        </div>
         {error ? (
-          <p role="alert" style={{ color: "var(--error)", fontSize: "0.9rem", margin: 0 }}>
+          <p role="alert" className="m-0 text-sm text-destructive">
             {error}
           </p>
         ) : null}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            marginTop: "0.25rem",
-            padding: "0.6rem 1rem",
-            borderRadius: "6px",
-            border: "none",
-            background: "var(--accent)",
-            color: "#fff",
-            fontWeight: 600,
-          }}
-        >
+        <LoadingButton type="submit" loading={loading} className="mt-1">
           {loading ? "Creating…" : "Sign up"}
-        </button>
+        </LoadingButton>
       </form>
-      <p style={{ marginTop: "1.25rem", fontSize: "0.9rem", color: "var(--muted)" }}>
-        Already have an account? <Link href="/sign-in">Sign in</Link>
+      <p className="mt-5 text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link href="/sign-in" className="text-primary underline-offset-4 hover:underline">
+          Sign in
+        </Link>
       </p>
     </>
   );

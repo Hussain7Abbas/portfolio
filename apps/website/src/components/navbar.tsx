@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cn } from "@devport/ui";
+import { cn } from "@/lib/utils";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const githubUrl =

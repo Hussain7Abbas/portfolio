@@ -34,9 +34,14 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <p style={{ color: "var(--muted)", marginBottom: "1rem" }}>
+      <p className="mb-4 text-muted-foreground">
         Public portfolio:{" "}
-        <a href={`${portfolioBase}/${p.username}/${p.activeTemplate}`} target="_blank" rel="noreferrer">
+        <a
+          href={`${portfolioBase}/${p.username}/${p.activeTemplate}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary underline-offset-4 hover:underline"
+        >
           {portfolioBase.replace(/^https?:\/\//, "")}/{p.username}/{p.activeTemplate}
         </a>
       </p>

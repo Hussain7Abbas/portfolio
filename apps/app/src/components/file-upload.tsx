@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Input, Label, Spinner } from "@devport/ui";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { apiFetch, apiJson, ApiError } from "@/lib/client-fetch";
 
 type PresignedResponse = {
@@ -13,7 +16,6 @@ type PresignedResponse = {
 const DEFAULT_MAX_IMAGE_MB = 5;
 const DEFAULT_MAX_PDF_MB = 10;
 
-// Must mirror ALLOWED_CONTENT_TYPES in apps/backend/src/routes/upload.ts
 const ALLOWED_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -59,7 +61,7 @@ export function FileUploadField({
         body: JSON.stringify({ publicUrl: url }),
       });
     } catch {
-      /* best-effort cleanup of the replaced/removed object; safe to ignore */
+      /* best-effort cleanup */
     }
   }
 
@@ -115,47 +117,39 @@ export function FileUploadField({
   }
 
   return (
-    <div>
+    <div className="space-y-2">
       <Label>{label}</Label>
       {currentUrl && isImage ? (
-        <div style={{ marginBottom: "0.5rem" }}>
-          <img
-            src={currentUrl}
-            alt=""
-            style={{
-              width: "4.5rem",
-              height: "4.5rem",
-              objectFit: "cover",
-              borderRadius: "6px",
-              border: "1px solid var(--border)",
-            }}
-          />
-        </div>
+        <img
+          src={currentUrl}
+          alt=""
+          className="h-[4.5rem] w-[4.5rem] rounded-md border object-cover"
+        />
       ) : currentUrl ? (
-        <p style={{ fontSize: "0.85rem", margin: "0 0 0.5rem" }}>
-          <a href={currentUrl} target="_blank" rel="noreferrer">
+        <p className="text-sm">
+          <a href={currentUrl} target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline">
             View current file
           </a>
         </p>
       ) : null}
-      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+      <div className="flex flex-wrap items-center gap-2">
         <Input
           type="file"
           accept={accept}
           disabled={disabled || loading}
           onChange={(e) => void onChange(e)}
-          style={{ padding: "0.35rem", maxWidth: "none" }}
+          className="max-w-none cursor-pointer p-1"
         />
-        {loading ? <Spinner size={14} /> : null}
+        {loading ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
         {currentUrl && !loading ? (
-          <Button type="button" variant="secondary" onClick={clear} disabled={disabled}>
+          <Button type="button" variant="outline" onClick={clear} disabled={disabled}>
             Remove
           </Button>
         ) : null}
       </div>
-      <p style={{ color: "var(--muted)", fontSize: "0.78rem", margin: "0.3rem 0 0" }}>Max {maxMb} MB.</p>
+      <p className="text-xs text-muted-foreground">Max {maxMb} MB.</p>
       {error ? (
-        <p role="alert" style={{ color: "var(--error)", fontSize: "0.85rem", margin: "0.35rem 0 0" }}>
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       ) : null}

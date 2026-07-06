@@ -118358,7 +118358,9 @@ var app = new Elysia().use(cors({
 })).onError(({ code, error: error50, set: set2 }) => {
   if (code === "VALIDATION") {
     set2.status = 400;
-    return { error: error50.message };
+    const first = error50.all[0];
+    const message2 = (first?.summary ? String(first.summary) : undefined) ?? (typeof first?.message === "string" ? first.message : undefined) ?? "Invalid request";
+    return { error: message2 };
   }
   if (code === "NOT_FOUND") {
     set2.status = 404;

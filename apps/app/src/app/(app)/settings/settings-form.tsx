@@ -2,13 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Label, Skeleton, useToast } from "@devport/ui";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LoadingButton } from "@/components/loading-button";
 import { DEFAULT_TEMPLATE_SLUG, TEMPLATES } from "@devport/templates";
 import { apiJson, ApiError } from "@/lib/client-fetch";
 
 export function SettingsForm() {
   const router = useRouter();
-  const toast = useToast();
   const [activeTemplate, setActiveTemplate] = useState(DEFAULT_TEMPLATE_SLUG);
   const [username, setUsername] = useState<string | null>(null);
   const [published, setPublished] = useState(true);
@@ -72,77 +82,75 @@ export function SettingsForm() {
   }
 
   return (
-    <div style={{ maxWidth: "32rem" }}>
-      <h1 style={{ marginTop: 0 }}>Settings</h1>
-      <section style={{ marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "1.1rem" }}>Portfolio template</h2>
-        <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+    <div className="max-w-lg">
+      <h1 className="mt-0">Settings</h1>
+      <section className="mb-8">
+        <h2 className="text-lg">Portfolio template</h2>
+        <p className="text-sm text-muted-foreground">
           Your public portfolio URL uses your username and this template key.
         </p>
         {loading ? (
-          <Skeleton height="2.25rem" width="16rem" style={{ marginTop: "0.75rem" }} />
+          <Skeleton className="mt-3 h-9 w-64" />
         ) : (
-          <div style={{ marginTop: "0.75rem" }}>
+          <div className="mt-3">
             <Label htmlFor="tpl">Active template</Label>
-            <select
-              id="tpl"
+            <Select
               value={activeTemplate}
-              onChange={(e) => setActiveTemplate(e.target.value)}
-              style={{
-                display: "block",
-                marginTop: "0.35rem",
-                padding: "0.5rem",
-                borderRadius: "6px",
-                border: "1px solid var(--border)",
-                background: "var(--input-bg)",
-                color: "var(--fg)",
-                maxWidth: "16rem",
+              onValueChange={(value) => {
+                if (value) setActiveTemplate(value);
               }}
             >
-              {TEMPLATES.map((tpl) => (
-                <option key={tpl.slug} value={tpl.slug}>
-                  {tpl.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="tpl" className="mt-1.5 max-w-64">
+                <SelectValue placeholder="Select template" />
+              </SelectTrigger>
+              <SelectContent>
+                {TEMPLATES.map((tpl) => (
+                  <SelectItem key={tpl.slug} value={tpl.slug}>
+                    {tpl.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
-        <Button
+        <LoadingButton
           type="button"
-          style={{ marginTop: "0.75rem" }}
+          className="mt-3"
           onClick={() => void saveTemplate()}
           loading={saving}
           disabled={loading}
         >
           Save template
-        </Button>
+        </LoadingButton>
       </section>
-      <section style={{ marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "1.1rem" }}>Visibility</h2>
+      <section className="mb-8">
+        <h2 className="text-lg">Visibility</h2>
         {loading ? (
-          <Skeleton height="2.25rem" width="16rem" style={{ marginTop: "0.75rem" }} />
+          <Skeleton className="mt-3 h-9 w-64" />
         ) : (
           <>
-            <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            <p className="text-sm text-muted-foreground">
               {published
                 ? "Your portfolio is live and visible to anyone with the link."
                 : "Your portfolio is unpublished; visitors will see a 404."}
             </p>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-              <input
-                type="checkbox"
+            <div className="mt-2 flex items-center gap-2">
+              <Checkbox
+                id="published"
                 checked={published}
-                onChange={() => void togglePublished()}
+                onCheckedChange={() => void togglePublished()}
                 disabled={togglingPublish}
               />
-              Published{username ? ` (iscoded.com/${username}/${activeTemplate})` : ""}
-            </label>
+              <Label htmlFor="published" className="font-normal">
+                Published{username ? ` (iscoded.com/${username}/${activeTemplate})` : ""}
+              </Label>
+            </div>
           </>
         )}
       </section>
       <section>
-        <h2 style={{ fontSize: "1.1rem" }}>Account</h2>
-        <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+        <h2 className="text-lg">Account</h2>
+        <p className="text-sm text-muted-foreground">
           Email and password are managed via Better Auth. Use sign-out and the auth flows on the sign-in page to change password if your deployment supports it.
         </p>
       </section>

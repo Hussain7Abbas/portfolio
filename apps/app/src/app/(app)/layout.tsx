@@ -31,45 +31,20 @@ export default async function AppShellLayout({ children }: { children: React.Rea
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside
-        style={{
-          width: "13rem",
-          flexShrink: 0,
-          borderRight: "1px solid var(--border)",
-          padding: "1rem 0.75rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.25rem",
-        }}
-      >
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: "0.95rem",
-            marginBottom: "0.75rem",
-            paddingLeft: "0.5rem",
-          }}
-        >
-          DevPort
-        </div>
+    <div className="flex min-h-screen">
+      <aside className="flex w-52 shrink-0 flex-col gap-1 border-r border-border px-3 py-4">
+        <div className="mb-3 pl-2 text-[0.95rem] font-bold">DevPort</div>
         {nav.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            style={{
-              padding: "0.4rem 0.5rem",
-              borderRadius: "6px",
-              textDecoration: "none",
-              color: "var(--fg)",
-              fontSize: "0.9rem",
-            }}
+            className="rounded-md px-2 py-1.5 text-sm text-foreground no-underline hover:bg-muted"
           >
             {item.label}
           </Link>
         ))}
       </aside>
-      <main style={{ flex: 1, padding: "1.5rem 2rem" }}>
+      <main className="flex-1 px-8 py-6">
         <AppHeader />
         {children}
       </main>

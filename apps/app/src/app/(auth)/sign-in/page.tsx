@@ -3,7 +3,7 @@ import { SignInForm } from "./sign-in-form";
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<p style={{ color: "var(--muted)" }}>Loading…</p>}>
+    <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
       <SignInForm />
     </Suspense>
   );

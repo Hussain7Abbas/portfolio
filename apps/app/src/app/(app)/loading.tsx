@@ -1,12 +1,12 @@
-import { Skeleton } from "@devport/ui";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AppLoading() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", maxWidth: "32rem" }}>
-      <Skeleton width="40%" height="1.5rem" />
-      <Skeleton height="2.25rem" />
-      <Skeleton height="2.25rem" />
-      <Skeleton height="6rem" />
+    <div className="flex max-w-lg flex-col gap-3">
+      <Skeleton className="h-6 w-[40%]" />
+      <Skeleton className="h-9" />
+      <Skeleton className="h-9" />
+      <Skeleton className="h-24" />
     </div>
   );
 }

@@ -19,16 +19,8 @@ export default async function OnboardingLayout({ children }: { children: React.R
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1.5rem",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: "30rem" }}>{children}</div>
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <div className="w-full max-w-[30rem]">{children}</div>
     </div>
   );
 }

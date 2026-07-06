@@ -2,9 +2,8 @@
   "extends": "@devport/tsconfig/nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/lib/utils": ["../../packages/ui/src/lib/utils.ts"],
+      "@/*": ["./src/*"]
     },
     "allowJs": true
   },

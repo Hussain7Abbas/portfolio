@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, EmptyState, Input, Label, Skeleton, useToast } from "@devport/ui";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import { LoadingButton } from "@/components/loading-button";
+import { EmptyState } from "@/components/empty-state";
 import { apiJson, ApiError } from "@/lib/client-fetch";
 
 type Repo = {
@@ -16,7 +22,6 @@ type Repo = {
 
 export function GithubClient() {
   const router = useRouter();
-  const toast = useToast();
   const [githubUsername, setGithubUsername] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -88,37 +93,37 @@ export function GithubClient() {
   }
 
   return (
-    <div style={{ maxWidth: "40rem" }}>
-      <h1 style={{ marginTop: 0 }}>GitHub</h1>
-      <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+    <div className="max-w-2xl">
+      <h1 className="mt-0">GitHub</h1>
+      <p className="text-sm text-muted-foreground">
         Set your GitHub username, load public repositories, and choose which appear on your portfolio.
       </p>
       {loadingConfig ? (
-        <Skeleton height="2.25rem" width="20rem" style={{ marginTop: "1rem" }} />
+        <Skeleton className="mt-4 h-9 w-80" />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+        <div className="mt-4 flex flex-col gap-3">
           <div>
             <Label htmlFor="ghu">GitHub username</Label>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div className="flex flex-wrap gap-2">
               <Input
                 id="ghu"
                 value={githubUsername}
-                onChange={(e) => setGithubUsername(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGithubUsername(e.target.value)}
                 placeholder="octocat"
               />
-              <Button
+              <LoadingButton
                 type="button"
-                variant="secondary"
+                variant="outline"
                 onClick={() => void fetchRepos()}
                 loading={loadingRepos}
                 disabled={!githubUsername.trim()}
               >
                 Load repos
-              </Button>
+              </LoadingButton>
             </div>
           </div>
           {repoError ? (
-            <p role="alert" style={{ color: "var(--error)" }}>
+            <p role="alert" className="text-destructive">
               {repoError}
             </p>
           ) : null}
@@ -126,38 +131,31 @@ export function GithubClient() {
             <EmptyState title="No public repositories found" description="Check the username and try again." />
           ) : null}
           {repos.length > 0 ? (
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, maxHeight: "22rem", overflow: "auto" }}>
+            <ul className="m-0 max-h-[22rem] list-none overflow-auto p-0">
               {repos.map((r) => (
                 <li
                   key={r.id}
-                  style={{
-                    padding: "0.5rem 0",
-                    borderBottom: "1px solid var(--border)",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "0.5rem",
-                  }}
+                  className="flex items-start gap-2 border-b border-border py-2"
                 >
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(r.name)}
-                    onChange={() => toggle(r.name)}
+                  <Checkbox
                     id={`repo-${r.id}`}
+                    checked={selected.includes(r.name)}
+                    onCheckedChange={() => toggle(r.name)}
                   />
-                  <label htmlFor={`repo-${r.id}`} style={{ cursor: "pointer", flex: 1 }}>
+                  <label htmlFor={`repo-${r.id}`} className="flex-1 cursor-pointer">
                     <strong>{r.name}</strong>{" "}
-                    <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>★ {r.stars}</span>
+                    <span className="text-sm text-muted-foreground">★ {r.stars}</span>
                     {r.description ? (
-                      <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{r.description}</div>
+                      <div className="text-sm text-muted-foreground">{r.description}</div>
                     ) : null}
                   </label>
                 </li>
               ))}
             </ul>
           ) : null}
-          <Button type="button" onClick={() => void save()} loading={saving}>
+          <LoadingButton type="button" onClick={() => void save()} loading={saving}>
             Save configuration
-          </Button>
+          </LoadingButton>
         </div>
       )}
     </div>

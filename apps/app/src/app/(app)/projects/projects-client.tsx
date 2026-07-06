@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Button,
-  Card,
-  EmptyState,
-  Input,
-  Label,
-  Skeleton,
-  Textarea,
-  useConfirm,
-  useToast,
-} from "@devport/ui";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { LoadingButton } from "@/components/loading-button";
+import { EmptyState } from "@/components/empty-state";
+import { useConfirm } from "@/components/use-confirm";
 import { apiFetch, apiJson, ApiError } from "@/lib/client-fetch";
 import { FileUploadField } from "@/components/file-upload";
 
@@ -86,7 +85,9 @@ function ProjectFields({
         <Input
           id={`${idPrefix}-name`}
           value={form.name}
-          onChange={(e) => onChange({ ...form, name: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, name: e.target.value })
+          }
           required
         />
       </div>
@@ -95,7 +96,9 @@ function ProjectFields({
         <Textarea
           id={`${idPrefix}-desc`}
           value={form.description}
-          onChange={(e) => onChange({ ...form, description: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            onChange({ ...form, description: e.target.value })
+          }
         />
       </div>
       <div>
@@ -103,7 +106,9 @@ function ProjectFields({
         <Input
           id={`${idPrefix}-tags`}
           value={form.tags}
-          onChange={(e) => onChange({ ...form, tags: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, tags: e.target.value })
+          }
         />
       </div>
       <FileUploadField
@@ -114,13 +119,15 @@ function ProjectFields({
         onCleared={() => onChange({ ...form, imageUrl: null })}
       />
       <div>
-        <Label htmlFor={`${idPrefix}-img`} style={{ fontSize: "0.78rem" }}>
+        <Label htmlFor={`${idPrefix}-img`} className="text-xs">
           Or paste an image URL
         </Label>
         <Input
           id={`${idPrefix}-img`}
           value={form.imageUrl ?? ""}
-          onChange={(e) => onChange({ ...form, imageUrl: e.target.value || null })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, imageUrl: e.target.value || null })
+          }
         />
       </div>
       <div>
@@ -128,7 +135,9 @@ function ProjectFields({
         <Input
           id={`${idPrefix}-demo`}
           value={form.demoUrl}
-          onChange={(e) => onChange({ ...form, demoUrl: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, demoUrl: e.target.value })
+          }
         />
       </div>
       <div>
@@ -136,7 +145,9 @@ function ProjectFields({
         <Input
           id={`${idPrefix}-src`}
           value={form.sourceUrl}
-          onChange={(e) => onChange({ ...form, sourceUrl: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ ...form, sourceUrl: e.target.value })
+          }
         />
       </div>
     </>
@@ -145,7 +156,6 @@ function ProjectFields({
 
 export function ProjectsClient() {
   const router = useRouter();
-  const toast = useToast();
   const { confirm, dialog } = useConfirm();
 
   const [items, setItems] = useState<Project[]>([]);
@@ -285,28 +295,28 @@ export function ProjectsClient() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Projects</h1>
+      <h1 className="mt-0">Projects</h1>
 
       <form
         onSubmit={(e) => void add(e)}
-        style={{ marginBottom: "2rem", display: "flex", flexDirection: "column", gap: "0.65rem", maxWidth: "28rem" }}
+        className="mb-8 flex max-w-md flex-col gap-2.5"
       >
-        <h2 style={{ fontSize: "1.1rem" }}>Add project</h2>
+        <h2 className="text-lg">Add project</h2>
         <ProjectFields form={addForm} onChange={setAddForm} idPrefix="add" />
-        <Button type="submit" loading={adding}>
+        <LoadingButton type="submit" loading={adding}>
           Add
-        </Button>
+        </LoadingButton>
       </form>
 
-      <h2 style={{ fontSize: "1.1rem" }}>Your projects</h2>
+      <h2 className="text-lg">Your projects</h2>
 
       {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", maxWidth: "28rem" }}>
-          <Skeleton height="5rem" />
-          <Skeleton height="5rem" />
+        <div className="flex max-w-md flex-col gap-3">
+          <Skeleton className="h-20" />
+          <Skeleton className="h-20" />
         </div>
       ) : loadError ? (
-        <p role="alert" style={{ color: "var(--error)" }}>
+        <p role="alert" className="text-destructive">
           {loadError}
         </p>
       ) : items.length === 0 ? (
@@ -315,74 +325,76 @@ export function ProjectsClient() {
           description="Add your first project above to showcase it on your portfolio."
         />
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {items.map((proj, idx) =>
             editingId === proj.id ? (
               <li key={proj.id}>
                 <Card>
-                  <form
-                    onSubmit={(e) => void saveEdit(e)}
-                    style={{ display: "flex", flexDirection: "column", gap: "0.65rem", maxWidth: "26rem" }}
-                  >
-                    <ProjectFields form={editForm} onChange={setEditForm} idPrefix={`edit-${proj.id}`} />
-                    <div style={{ display: "flex", gap: "0.35rem" }}>
-                      <Button type="submit" loading={savingEdit}>
-                        Save
-                      </Button>
-                      <Button type="button" variant="secondary" onClick={cancelEdit} disabled={savingEdit}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
+                  <CardContent className="pt-4">
+                    <form
+                      onSubmit={(e) => void saveEdit(e)}
+                      className="flex max-w-md flex-col gap-2.5"
+                    >
+                      <ProjectFields form={editForm} onChange={setEditForm} idPrefix={`edit-${proj.id}`} />
+                      <div className="flex gap-1.5">
+                        <LoadingButton type="submit" loading={savingEdit}>
+                          Save
+                        </LoadingButton>
+                        <Button type="button" variant="outline" onClick={cancelEdit} disabled={savingEdit}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
                 </Card>
               </li>
             ) : (
               <li key={proj.id}>
                 <Card>
-                  <strong>{proj.name}</strong>
-                  {proj.description ? (
-                    <p style={{ margin: "0.35rem 0", color: "var(--muted)", fontSize: "0.9rem" }}>
-                      {proj.description}
-                    </p>
-                  ) : null}
-                  {proj.tags.length > 0 ? (
-                    <p style={{ margin: 0, fontSize: "0.85rem" }}>{proj.tags.join(", ")}</p>
-                  ) : null}
-                  <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={() => move(idx, -1)}
-                      disabled={idx === 0 || pendingId !== null}
-                    >
-                      Up
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={() => move(idx, 1)}
-                      disabled={idx === items.length - 1 || pendingId !== null}
-                    >
-                      Down
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={() => startEdit(proj)}
-                      disabled={pendingId !== null}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      type="button"
-                      onClick={() => void remove(proj)}
-                      loading={pendingId === proj.id}
-                      disabled={pendingId !== null && pendingId !== proj.id}
-                    >
-                      Delete
-                    </Button>
-                  </div>
+                  <CardContent className="pt-4">
+                    <strong>{proj.name}</strong>
+                    {proj.description ? (
+                      <p className="my-1.5 text-sm text-muted-foreground">{proj.description}</p>
+                    ) : null}
+                    {proj.tags.length > 0 ? (
+                      <p className="m-0 text-sm">{proj.tags.join(", ")}</p>
+                    ) : null}
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => move(idx, -1)}
+                        disabled={idx === 0 || pendingId !== null}
+                      >
+                        Up
+                      </Button>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => move(idx, 1)}
+                        disabled={idx === items.length - 1 || pendingId !== null}
+                      >
+                        Down
+                      </Button>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => startEdit(proj)}
+                        disabled={pendingId !== null}
+                      >
+                        Edit
+                      </Button>
+                      <LoadingButton
+                        variant="destructive"
+                        type="button"
+                        onClick={() => void remove(proj)}
+                        loading={pendingId === proj.id}
+                        disabled={pendingId !== null && pendingId !== proj.id}
+                      >
+                        Delete
+                      </LoadingButton>
+                    </div>
+                  </CardContent>
                 </Card>
               </li>
             ),

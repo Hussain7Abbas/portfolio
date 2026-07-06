@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Label, Skeleton, Textarea, useToast } from "@devport/ui";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { LoadingButton } from "@/components/loading-button";
 import { apiJson, ApiError } from "@/lib/client-fetch";
 import { FileUploadField } from "@/components/file-upload";
 
@@ -15,7 +20,6 @@ type Seo = {
 
 export function SeoForm() {
   const router = useRouter();
-  const toast = useToast();
   const [seo, setSeo] = useState<Seo>({
     title: null,
     description: null,
@@ -62,39 +66,53 @@ export function SeoForm() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: "32rem" }}>
-        <h1 style={{ marginTop: 0 }}>SEO</h1>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
-          <Skeleton height="2.25rem" />
-          <Skeleton height="5rem" />
-          <Skeleton height="2.25rem" />
+      <div className="max-w-lg">
+        <h1 className="mt-0">SEO</h1>
+        <div className="mt-4 flex flex-col gap-3">
+          <Skeleton className="h-9" />
+          <Skeleton className="h-20" />
+          <Skeleton className="h-9" />
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: "32rem" }}>
-      <h1 style={{ marginTop: 0 }}>SEO</h1>
-      <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+    <div className="max-w-lg">
+      <h1 className="mt-0">SEO</h1>
+      <p className="text-sm text-muted-foreground">
         Overrides for your public portfolio pages (Open Graph and search snippets).
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+      <div className="mt-4 flex flex-col gap-3">
         <div>
           <Label htmlFor="t">Title</Label>
-          <Input id="t" value={seo.title ?? ""} onChange={(e) => setSeo({ ...seo, title: e.target.value || null })} />
+          <Input
+            id="t"
+            value={seo.title ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSeo({ ...seo, title: e.target.value || null })
+            }
+          />
         </div>
         <div>
           <Label htmlFor="d">Description</Label>
           <Textarea
             id="d"
             value={seo.description ?? ""}
-            onChange={(e) => setSeo({ ...seo, description: e.target.value || null })}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setSeo({ ...seo, description: e.target.value || null })
+            }
           />
         </div>
         <div>
           <Label htmlFor="k">Keywords (comma-separated)</Label>
-          <Input id="k" value={seo.keywords ?? ""} onChange={(e) => setSeo({ ...seo, keywords: e.target.value || null })} />
+          <Input
+            id="k"
+            value={seo.keywords ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSeo({ ...seo, keywords: e.target.value || null })
+            }
+          />
         </div>
         <FileUploadField
           label="Open Graph image"
@@ -104,14 +122,20 @@ export function SeoForm() {
           onCleared={() => setSeo({ ...seo, ogImage: null })}
         />
         <div>
-          <Label htmlFor="og" style={{ fontSize: "0.78rem" }}>
+          <Label htmlFor="og" className="text-xs">
             Or paste an OG image URL
           </Label>
-          <Input id="og" value={seo.ogImage ?? ""} onChange={(e) => setSeo({ ...seo, ogImage: e.target.value || null })} />
+          <Input
+            id="og"
+            value={seo.ogImage ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSeo({ ...seo, ogImage: e.target.value || null })
+            }
+          />
         </div>
-        <Button type="button" onClick={() => void save()} loading={saving}>
+        <LoadingButton type="button" onClick={() => void save()} loading={saving}>
           Save
-        </Button>
+        </LoadingButton>
       </div>
     </div>
   );
