@@ -6,14 +6,14 @@ Workspace packages are consumed as `workspace:*` dependencies and ship TypeScrip
 
 ## `@devport/db`
 
-Prisma 7 + PostgreSQL. `prisma/schema.prisma` generates into the gitignored `generated/prisma` folder. `src/index.ts` exports a singleton `prisma` client (via `@prisma/adapter-pg`) and re-exports every generated model type. `prisma.config.ts` loads the root `.env`. For the models, see [Architecture → Data model](architecture.md#data-model). Rules: [packages/db/AGENTS.md](../packages/db/AGENTS.md).
+Prisma 7 + PostgreSQL. `prisma/schema.prisma` generates into the gitignored `generated/prisma` folder. `src/index.ts` exports a singleton `prisma` client (via `@prisma/adapter-pg`) and re-exports every generated model type. `prisma.config.ts` loads `packages/db/.env` for the Prisma CLI; at runtime the backend supplies `DATABASE_URL`. For the models, see [Architecture → Data model](architecture.md#data-model). Rules: [packages/db/AGENTS.md](../packages/db/AGENTS.md).
 
 ## `@devport/auth`
 
 Better Auth configuration.
 
-- `@devport/auth/server` exports `auth`: the Prisma adapter, email/password with required verification, optional Google/GitHub OAuth, the `role` additional field, and trusted origins. The backend mounts `auth.handler` and uses `auth.api.getSession`.
-- `@devport/auth/client` exports `createDevPortAuthClient(baseURL?)`, a `better-auth/react` client. The app and dashboard call it with the browser's own origin so requests go through the `/api` rewrite.
+- `@devport/auth/server` exports `auth`: the Prisma adapter, email/password with required verification by 6-digit email OTP (Better Auth `emailOTP` plugin, sent through Resend by `src/email.ts`), optional Google/GitHub OAuth, the `role` additional field, and trusted origins. The backend mounts `auth.handler` and uses `auth.api.getSession`.
+- `@devport/auth/client` exports `createDevPortAuthClient(baseURL?)`, a `better-auth/react` client with the `emailOTPClient` plugin (`authClient.emailOtp.*`). The app and dashboard call it with the browser's own origin so requests go through the `/api` rewrite.
 
 ## `@devport/ui`
 

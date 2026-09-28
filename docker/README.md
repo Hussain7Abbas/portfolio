@@ -10,4 +10,4 @@
 
 `apps/website` builds static files to `out/` (gitignored). The website image copies that folder into nginx.
 
-Next.js `standalone` servers listen on port 3000 inside each app container. Set `NEXT_PUBLIC_*` and `BETTER_AUTH_*` via `.env` used at **build** time where those values are inlined into the client bundle.
+Next.js `standalone` servers listen on port 3000 inside each app container. Each service reads its own `apps/<name>/.env` (`env_file`), and Postgres credentials come from `docker/.env` (see `docker/.env.example`). `NEXT_PUBLIC_*` values are inlined at **build** time: the Next images copy `apps/` into the build, so fill `apps/<name>/.env` before building.

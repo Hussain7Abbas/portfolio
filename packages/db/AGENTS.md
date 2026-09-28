@@ -5,7 +5,7 @@ Prisma 7 schema and PostgreSQL client for the whole monorepo. Shared rules live 
 ## Structure
 
 - `prisma/schema.prisma` — the schema (`prisma-client` generator, output `../generated/prisma`).
-- `prisma.config.ts` — loads `.env` from the repo root, then this package; falls back to a placeholder URL so `prisma generate` works without a database.
+- `prisma.config.ts` — loads `DATABASE_URL` from this package's `.env` (template: `.env.example`) for the Prisma CLI; falls back to a placeholder URL so `prisma generate` works without a database.
 - `src/index.ts` — exports `prisma` (global singleton using `@prisma/adapter-pg`, throws if `DATABASE_URL` is unset) and re-exports all generated types.
 - `generated/` — gitignored Prisma output; never edit or import it directly.
 

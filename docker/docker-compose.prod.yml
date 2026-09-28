@@ -1,6 +1,6 @@
-# Production-oriented stack. Set POSTGRES_* and copy .env with secrets.
-# Build Next apps with correct BACKEND_URL for rewrites (default: http://backend:3001).
-# Usage: docker compose -f docker/docker-compose.prod.yml --env-file ../.env up --build
+# Production-oriented stack. Each service reads its own apps/<name>/.env (copy from .env.example);
+# POSTGRES_* come from docker/.env. Next apps get BACKEND_URL for rewrites as a build arg.
+# Usage: docker compose -f docker/docker-compose.prod.yml up --build
 
 services:
   postgres:
@@ -27,7 +27,7 @@ services:
       postgres:
         condition: service_healthy
     env_file:
-      - ../.env
+      - ../apps/backend/.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-devport}:${POSTGRES_PASSWORD:-devport}@postgres:5432/${POSTGRES_DB:-devport}
     expose:
@@ -52,7 +52,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - ../.env
+      - ../apps/app/.env
     expose:
       - "3000"
 
@@ -67,7 +67,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - ../.env
+      - ../apps/portfolio/.env
     expose:
       - "3000"
 
@@ -82,7 +82,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - ../.env
+      - ../apps/dashboard/.env
     expose:
       - "3000"
 

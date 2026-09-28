@@ -35,8 +35,8 @@ The `routes/*.ts` files are the source of truth for methods and body schemas.
 
 - **Public payloads** go through `public*` mappers in `routes/portfolio.ts`, so internal fields are never exposed. Profiles with `published = false` return 404 and are left out of the sitemap.
 - **Contact form** requests are rate-limited per client IP (`lib/rate-limit.ts`, `lib/request-ip.ts`, which honours `x-forwarded-for` and `x-real-ip`) and stored as `ContactMessage` rows.
-- **GitHub** repo lists come from the GitHub REST API (optionally authenticated with `GITHUB_API_KEY`). Forks and private repos are filtered out and results are cached in memory for 12 minutes.
+- **GitHub** repo lists come from the GitHub REST API (optionally authenticated with `GITHUB_API_KEY`, a GitHub token with no scopes that raises the rate limit from 60 to 5,000 requests/hour per IP; without it, busy instances can hit 403/429 from GitHub). Forks and private repos are filtered out and results are cached in memory for 12 minutes.
 - **Usernames** are checked against `lib/reserved-usernames.ts`.
 - **URLs** supplied by users must be absolute `http(s)` (`lib/url-validate.ts`).
-- **Uploads** limit content types to png/jpeg/gif/webp/svg/pdf, capped at 5 MB for images and 10 MB for PDFs, with keys under `uploads/<userId>/`.
+- **Uploads** limit content types to png/jpeg/gif/webp/svg/pdf, capped at 5 MB for images and 10 MB for PDFs, with keys under `uploads/<userId>/` in Hetzner Object Storage (`lib/s3.ts`).
 - The cache and the rate limiter are in-memory and per process.

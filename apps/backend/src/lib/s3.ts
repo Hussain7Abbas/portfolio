@@ -5,75 +5,84 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-function getClient(): S3Client | null {
-  if (
-    !process.env.AWS_ACCESS_KEY_ID ||
-    !process.env.AWS_SECRET_ACCESS_KEY ||
-    !process.env.AWS_S3_BUCKET ||
-    !process.env.AWS_REGION
-  ) {
+type StorageConfig = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucket: string;
+  location: string;
+};
+
+/** Hetzner Object Storage config; locations are e.g. `fsn1`, `nbg1`, `hel1`. */
+function getConfig(): StorageConfig | null {
+  const accessKeyId = process.env.HETZNER_S3_ACCESS_KEY;
+  const secretAccessKey = process.env.HETZNER_S3_SECRET_KEY;
+  const bucket = process.env.HETZNER_S3_BUCKET;
+  const location = process.env.HETZNER_S3_LOCATION;
+  if (!accessKeyId || !secretAccessKey || !bucket || !location) {
     return null;
   }
+  return { accessKeyId, secretAccessKey, bucket, location };
+}
+
+function publicHost(config: StorageConfig): string {
+  return `${config.bucket}.${config.location}.your-objectstorage.com`;
+}
+
+function getClient(config: StorageConfig): S3Client {
   return new S3Client({
-    region: process.env.AWS_REGION,
+    region: config.location,
+    endpoint: `https://${config.location}.your-objectstorage.com`,
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
     },
+    // Hetzner does not support the default CRC32 checksums newer AWS SDKs add to every request.
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 }
 
 export function isS3Configured(): boolean {
-  return getClient() !== null;
+  return getConfig() !== null;
 }
 
 export async function generatePresignedPutUrl(
   key: string,
   contentType: string,
 ): Promise<{ uploadUrl: string; publicUrl: string } | null> {
-  const client = getClient();
-  const bucket = process.env.AWS_S3_BUCKET;
-  const region = process.env.AWS_REGION;
-  if (!client || !bucket || !region) return null;
+  const config = getConfig();
+  if (!config) return null;
 
   const command = new PutObjectCommand({
-    Bucket: bucket,
+    Bucket: config.bucket,
     Key: key,
     ContentType: contentType,
   });
 
-  const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
-  const publicUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  const uploadUrl = await getSignedUrl(getClient(config), command, { expiresIn: 3600 });
+  const publicUrl = `https://${publicHost(config)}/${key}`;
   return { uploadUrl, publicUrl };
 }
 
 export async function deleteS3Object(key: string): Promise<void> {
-  const client = getClient();
-  const bucket = process.env.AWS_S3_BUCKET;
-  if (!client || !bucket) return;
+  const config = getConfig();
+  if (!config) return;
 
-  await client.send(
+  await getClient(config).send(
     new DeleteObjectCommand({
-      Bucket: bucket,
+      Bucket: config.bucket,
       Key: key,
     }),
   );
 }
 
 export function parseS3KeyFromPublicUrl(url: string): string | null {
+  const config = getConfig();
+  if (!config) return null;
   try {
     const u = new URL(url);
-    const host = u.hostname;
-    const bucket = process.env.AWS_S3_BUCKET;
-    const region = process.env.AWS_REGION;
-    if (!bucket || !region) return null;
-    if (host === `${bucket}.s3.${region}.amazonaws.com`) {
-      return u.pathname.replace(/^\//, "");
-    }
-    if (host === `${bucket}.s3.amazonaws.com`) {
-      return u.pathname.replace(/^\//, "");
-    }
-    return null;
+    if (u.hostname !== publicHost(config)) return null;
+    return u.pathname.replace(/^\//, "");
   } catch {
     return null;
   }

@@ -4,10 +4,10 @@ Bun + Elysia REST API on port 3001. Serves Better Auth at `/api/auth/*` (mounted
 
 ## Structure
 
-- `src/index.ts` — app composition: CORS (origins from `NEXT_PUBLIC_*_URL`), global `onError` (maps validation → 400, not found → 404, else 500 with `{ error }`), `.mount(auth.handler)`, then `.use(<routes>)`, `/health`.
+- `src/index.ts` — app composition: CORS (origins from `APP_URL`, `DASHBOARD_URL`, `PORTFOLIO_URL`, `WEBSITE_URL`), global `onError` (maps validation → 400, not found → 404, else 500 with `{ error }`), `.mount(auth.handler)`, then `.use(<routes>)`, `/health`.
 - `src/plugins/auth.ts` — `authMacro` with `auth: true` (401 without session) and `admin: true` (403 unless `role === "admin"`); exports `SessionUser`.
 - `src/routes/*.ts` — one `new Elysia()` plugin per resource, exported as `<name>Routes`, all paths prefixed `/api/...`.
-- `src/lib/*.ts` — small helpers: in-memory `cache` and `rate-limit`, `github-api`, `s3`, `request-ip`, `url-validate`, `reserved-usernames`.
+- `src/lib/*.ts` — small helpers: in-memory `cache` and `rate-limit`, `github-api`, `s3` (Hetzner Object Storage via the S3 API), `request-ip`, `url-validate`, `reserved-usernames`.
 
 ## Rules
 
@@ -16,8 +16,12 @@ Bun + Elysia REST API on port 3001. Serves Better Auth at `/api/auth/*` (mounted
 - Validate bodies with Elysia `t.Object(...)` schemas defined next to the routes. Validate user-supplied URLs with `isValidHttpUrl` / `findInvalidImageUrlField`.
 - Failures: set `set.status` and return `{ error: "..." }`. Success payloads are wrapped objects (`{ projects }`, `{ project }`), with `201` on create.
 - Public (unauthenticated) routes live in `routes/portfolio.ts`; rate-limit anything writable there (contact form uses `isRateLimited` keyed by client IP).
-- S3 is optional: check `isS3Configured()` and return 503 when unset. GitHub calls go through `lib/github-api.ts` (cached).
+- Object storage (Hetzner, `HETZNER_S3_*`) is optional: check `isS3Configured()` and return 503 when unset. GitHub calls go through `lib/github-api.ts` (cached).
 - The in-memory cache/rate limiter are per-process; don't rely on them across instances.
+
+## Environment
+
+All backend config lives in `apps/backend/.env` (template: `.env.example`), loaded by Bun from the app directory. It also covers `@devport/auth/server` (Better Auth, OAuth, Resend email OTP).
 
 ## Commands
 

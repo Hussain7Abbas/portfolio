@@ -30,7 +30,7 @@ Project documentation starts at [docs/intro.md](docs/intro.md).
 - Run `bun run typecheck` after every change; it must pass. There is no lint, formatter, or test suite configured — do not claim to have run them.
 - Cross-workspace imports go through package names (`@devport/db`, `@devport/auth/server`, …) declared as `workspace:*` dependencies, never relative paths across `apps/`/`packages/`. Exception: `@devport/ui` is consumed via tsconfig path aliases (see [packages/ui/AGENTS.md](packages/ui/AGENTS.md)).
 - The browser never talks to the backend directly from `apps/app` / `apps/dashboard`: their Next config rewrites `/api/*` to `BACKEND_URL`, so auth cookies stay on the app origin. Keep it that way.
-- New env vars: add to `.env.example` with a comment, and to `turbo.json` `globalEnv` if they affect builds. `NEXT_PUBLIC_*` values are inlined at build time.
+- Env vars are per workspace: each app (and `packages/db` for the Prisma CLI) has its own `.env.example` → `.env`; there is no root `.env`. Add a new var only to the `.env.example` of the workspace that reads it, with a comment. Code in `packages/auth/src/server.ts` runs inside the backend, so its vars go in `apps/backend/.env.example`. If a non-`NEXT_PUBLIC_*` var affects a build output, list it under that workspace's `turbo.json` `build.env`. `NEXT_PUBLIC_*` values are inlined at build time.
 - Keep features free/open-source (no paywall logic). Templates are added by PR, not at runtime.
 - Do not edit `legacy/`, generated output (`packages/db/generated/`, `.next/`, `dist/`, `out/`), or `bun.lock` by hand.
 
@@ -47,7 +47,8 @@ Project documentation starts at [docs/intro.md](docs/intro.md).
 ```bash
 bun install
 docker compose -f docker/docker-compose.yml up -d   # local Postgres 16
-cp .env.example .env                                 # then fill DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL
+for f in packages/db apps/backend apps/app apps/dashboard apps/portfolio apps/website; do cp "$f/.env.example" "$f/.env"; done
+# then fill apps/backend/.env (DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, …)
 bun run db:push      # sync schema + prisma generate
 bun run dev          # all apps via turbo
 bun run typecheck    # all workspaces

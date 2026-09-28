@@ -24,7 +24,6 @@ export default function SignUpPage() {
       name,
       email,
       password,
-      callbackURL: `${window.location.origin}/`,
     });
     setLoading(false);
     if (res.error) {

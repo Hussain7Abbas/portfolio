@@ -3,7 +3,7 @@
 ## Setup
 
 - Install [Bun](https://bun.sh).
-- Copy `.env.example` to `.env` and set `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL` (browser origin for the user app when using Next `/api` rewrites).
+- Copy each workspace's `.env.example` to `.env` (`packages/db` and every app under `apps/`). In `apps/backend/.env`, set `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL` (browser origin for the user app when using Next `/api` rewrites).
 - `bun install`
 - Start Postgres (e.g. `docker compose -f docker/docker-compose.yml up -d`).
 - `bun run db:push`

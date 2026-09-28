@@ -4,8 +4,6 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "prisma/config";
 
 const pkgRoot = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(pkgRoot, "../..");
-config({ path: resolve(repoRoot, ".env") });
 config({ path: resolve(pkgRoot, ".env") });
 
 const databaseUrl =

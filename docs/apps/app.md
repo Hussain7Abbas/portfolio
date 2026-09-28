@@ -6,7 +6,7 @@ A Next.js 15 App Router application (port 3000, `standalone` output) where users
 
 ## Flow
 
-1. **Sign up / sign in** (`(auth)/sign-up`, `(auth)/sign-in`) through the Better Auth React client. Email/password accounts must verify their email (`(auth)/verify-email`) before they get in. In development, the verification link is printed in the backend console.
+1. **Sign up / sign in** (`(auth)/sign-up`, `(auth)/sign-in`) through the Better Auth React client. Email/password accounts must verify their email before they get in: `(auth)/verify-email` takes the 6-digit code sent by email (`authClient.emailOtp.verifyEmail`) and can resend it. Without Resend configured, the code is printed in the backend console.
 2. **Onboarding** (`/onboarding`) is a guided wizard that creates the `Profile` (username, display name, template, …).
 3. **Portal sections** under `(app)/`:
    - `profile`: bio, links, photo, and resume uploads.
@@ -22,7 +22,7 @@ A Next.js 15 App Router application (port 3000, `standalone` output) where users
 
 - Client components call `apiJson<T>(path, init)` from `src/lib/client-fetch.ts`. It sends cookies, sets a JSON content type, and throws `ApiError` with the backend's `{ error }` message.
 - Server components use `getServerSession()` and `fetchWithSession()` from `src/lib/session.ts`. These forward the request cookies to `NEXT_PUBLIC_APP_URL`, which the rewrite sends on to the backend.
-- `src/components/file-upload.tsx` requests a presigned URL from `/api/upload/presigned-url` and PUTs the file directly to S3.
+- `src/components/file-upload.tsx` requests a presigned URL from `/api/upload/presigned-url` and PUTs the file directly to Hetzner Object Storage.
 
 ## UI
 

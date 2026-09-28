@@ -28,13 +28,13 @@ browser ──► website (static files, no API)
 
 - **User portal and dashboard** proxy `/api/*` to the backend with a Next.js rewrite (`BACKEND_URL`, default `http://127.0.0.1:3001`). Because the browser only sees the app origin, Better Auth cookies are first-party. Server components forward the incoming cookies when they call the API (`src/lib/session.ts`).
 - **Portfolio** fetches `/api/portfolio/:username` server-side with a 60 s revalidate, and `/api/portfolio/sitemap` for `sitemap.xml`. Unpublished profiles return 404.
-- **Backend** allows CORS from the four `NEXT_PUBLIC_*_URL` origins, which are also Better Auth's `trustedOrigins`.
+- **Backend** allows CORS from the four frontend origins (`APP_URL`, `DASHBOARD_URL`, `PORTFOLIO_URL`, `WEBSITE_URL` in `apps/backend/.env`), which are also Better Auth's `trustedOrigins`.
 
 ## Authentication
 
 Better Auth (`packages/auth`) with the Prisma adapter:
 
-- Email + password with **required email verification**. Until a mail provider is wired up, the verification link is logged to the backend console. The link is rewritten to the app origin so the session cookie lands on the right domain.
+- Email + password with **required email verification** by a 6-digit one-time code (Better Auth `emailOTP` plugin with `overrideDefaultEmailVerification`). Codes are sent on sign-up and on sign-in of an unverified account, expire after 10 minutes, and are delivered through [Resend](https://resend.com) (`RESEND_API_KEY`, `EMAIL_FROM`). Without those vars the code is logged to the backend console. Verifying the code signs the user in; the request goes through the app's `/api` rewrite, so the session cookie lands on the app origin.
 - Optional Google and GitHub OAuth, enabled only when both client id and secret env vars are set.
 - A `role` user field (`"user"` by default, `"admin"` for dashboard access; not user-settable).
 - Enforcement: Next middleware in `apps/app` (session + verified email) and `apps/dashboard` (session + admin role); backend `authMacro` (`auth: true` / `admin: true`).
@@ -56,4 +56,4 @@ Template metadata (slug, name, description) lives in `@devport/templates` and is
 
 ## File uploads
 
-The backend issues S3 presigned PUT URLs (`/api/upload/presigned-url`) for images and PDFs. It enforces type and size limits and uses per-user key prefixes. Uploads are disabled (503) when the AWS env vars are missing.
+Files are stored in [Hetzner Object Storage](https://docs.hetzner.com/storage/object-storage/) through its S3-compatible API (`@aws-sdk/client-s3`, endpoint `https://<location>.your-objectstorage.com`). The backend issues presigned PUT URLs (`/api/upload/presigned-url`) for images and PDFs, enforces type and size limits, and uses per-user key prefixes. Public URLs have the form `https://<bucket>.<location>.your-objectstorage.com/<key>`, so the bucket must be public. Uploads are disabled (503) when the `HETZNER_S3_*` env vars are missing.

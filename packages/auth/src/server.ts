@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { emailOTP } from "better-auth/plugins";
 import { prisma } from "@devport/db";
+import { sendEmail } from "./email";
 
 const google =
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -18,7 +20,7 @@ const github =
       }
     : undefined;
 
-const appOrigin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const OTP_EXPIRES_IN_S = 10 * 60;
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -30,19 +32,32 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
+    sendOnSignIn: true,
     autoSignInAfterVerification: true,
-    expiresIn: 60 * 60,
-    async sendVerificationEmail({ user, url }) {
-      // Make sure the link always points at the app origin (which proxies /api to the backend),
-      // regardless of how BETTER_AUTH_URL is configured, so the session cookie set on
-      // verification is scoped to the domain the app's own fetches use.
-      const [, query] = url.split("?");
-      const verifyUrl = query ? `${appOrigin}/api/auth/verify-email?${query}` : url;
-      // TODO(production): wire up a real transactional email provider (Resend, SES, Postmark...).
-      // For now this logs the link so it can be copied during local development / MVP testing.
-      console.log(`[devport] Verification email for ${user.email}: ${verifyUrl}`);
-    },
   },
+  plugins: [
+    emailOTP({
+      otpLength: 6,
+      expiresIn: OTP_EXPIRES_IN_S,
+      // Replaces link-based verification: sign-up / sign-in send a code instead of a link.
+      overrideDefaultEmailVerification: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        const subject =
+          type === "email-verification"
+            ? "Your DevPort verification code"
+            : type === "forget-password"
+              ? "Your DevPort password reset code"
+              : "Your DevPort sign-in code";
+        const minutes = OTP_EXPIRES_IN_S / 60;
+        await sendEmail({
+          to: email,
+          subject,
+          text: `Your DevPort code is ${otp}. It expires in ${minutes} minutes.`,
+          html: `<p>Your DevPort code is:</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${otp}</p><p>It expires in ${minutes} minutes. If you didn't request it, you can ignore this email.</p>`,
+        });
+      },
+    }),
+  ],
   socialProviders: {
     ...(google ? { google } : {}),
     ...(github ? { github } : {}),
@@ -57,9 +72,9 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: [
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-    process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3003",
-    process.env.NEXT_PUBLIC_PORTFOLIO_URL ?? "http://localhost:3002",
-    process.env.NEXT_PUBLIC_WEBSITE_URL ?? "http://localhost:3004",
+    process.env.APP_URL ?? "http://localhost:3000",
+    process.env.DASHBOARD_URL ?? "http://localhost:3003",
+    process.env.PORTFOLIO_URL ?? "http://localhost:3002",
+    process.env.WEBSITE_URL ?? "http://localhost:3004",
   ],
 });

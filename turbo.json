@@ -1,17 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    ".env"
-  ],
-  "globalEnv": [
-    "DATABASE_URL",
-    "BETTER_AUTH_SECRET",
-    "BETTER_AUTH_URL",
-    "AWS_ACCESS_KEY_ID",
-    "AWS_SECRET_ACCESS_KEY",
-    "AWS_S3_BUCKET",
-    "AWS_REGION"
-  ],
   "tasks": {
     "dev": {
       "dependsOn": [
@@ -29,6 +17,13 @@
         ".next/**",
         "!.next/cache/**",
         "dist/**"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.local",
+        ".env.production",
+        ".env.production.local"
       ]
     },
     "typecheck": {

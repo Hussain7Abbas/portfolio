@@ -29,9 +29,10 @@ Open-source developer portfolio platform (Turborepo monorepo).
 ## Setup
 
 ```bash
-cp .env.example .env
-# Set DATABASE_URL, BETTER_AUTH_SECRET (32+ chars), BETTER_AUTH_URL (browser origin, e.g. app on :3000)
-# Optional: NEXT_PUBLIC_GITHUB_REPO_URL for the marketing site GitHub links
+# Each app has its own .env.example (see docs/development.md#environment-variables)
+for f in packages/db apps/backend apps/app apps/dashboard apps/portfolio apps/website; do cp "$f/.env.example" "$f/.env"; done
+# Set DATABASE_URL, BETTER_AUTH_SECRET (32+ chars), BETTER_AUTH_URL in apps/backend/.env
+# Optional: Resend (email OTP), Hetzner Object Storage (uploads), OAuth, GITHUB_API_KEY
 
 bun install
 docker compose -f docker/docker-compose.yml up -d

@@ -13,10 +13,10 @@ import { portfolioPublicRoutes } from "./routes/portfolio";
 import { adminRoutes } from "./routes/admin";
 
 const origins = [
-  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-  process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3003",
-  process.env.NEXT_PUBLIC_PORTFOLIO_URL ?? "http://localhost:3002",
-  process.env.NEXT_PUBLIC_WEBSITE_URL ?? "http://localhost:3004",
+  process.env.APP_URL ?? "http://localhost:3000",
+  process.env.DASHBOARD_URL ?? "http://localhost:3003",
+  process.env.PORTFOLIO_URL ?? "http://localhost:3002",
+  process.env.WEBSITE_URL ?? "http://localhost:3004",
 ];
 
 const app = new Elysia()
