@@ -16,7 +16,8 @@ Open-source developer portfolio platform (Turborepo monorepo).
 
 - `@devport/db` — Prisma + PostgreSQL schema
 - `@devport/auth` — Better Auth server + React client helpers
-- `@devport/ui` — Shared UI utilities (`cn`, more to come)
+- `@devport/ui` — Shared shadcn/Base UI components and `cn`
+- `@devport/templates` — Portfolio template metadata and slugs
 - `@devport/tsconfig` — Shared TypeScript configs
 - `@devport/tailwind-config` — Shared Tailwind preset
 
@@ -38,7 +39,7 @@ bun run db:push
 bun run dev
 ```
 
-Implementation steps are documented in [`plan/`](./plan/). See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local development and PR expectations. Production Docker examples live under [`docker/`](./docker/README.md).
+Project documentation starts at [`docs/intro.md`](./docs/intro.md); agent/contributor rules are in [`AGENTS.md`](./AGENTS.md). The original implementation plans are in [`plan/`](./plan/). See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local development and PR expectations. Production Docker examples live under [`docker/`](./docker/README.md).
 
 ## Legacy
 
