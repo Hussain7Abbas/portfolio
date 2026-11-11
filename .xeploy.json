@@ -1,10 +1,24 @@
 {
   "type": "default",
+  "subprojectsDir": null,
   "tag_prefix": "v",
   "generate_release_notes": true,
   "create_production_release_branch": true,
   "create_tag": true,
-  "create_pr": { "production": false },
-  "environments": { "develop": "develop", "production": "main" },
-  "versionFiles": ["package.json"]
+  "create_pr": {
+    "staging": false,
+    "uat": false,
+    "sandbox": false,
+    "production": false
+  },
+  "environments": {
+    "develop": "develop",
+    "staging": null,
+    "uat": null,
+    "sandbox": null,
+    "production": "main"
+  },
+  "versionFiles": [
+    "package.json"
+  ]
 }
